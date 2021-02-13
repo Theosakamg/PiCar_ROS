@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>picar_slam</name>
+  <version>0.1.0</version>
+  <description>Software for PiCar-V of SunFounder.</description>
+  <author>Mickael Gaillard</author>
+  <maintainer email="mick.gaillard@gmail.com">Mickael Gaillard</maintainer>
+  <license>Apache 2.0</license>
+  <url type="website">http://www.github.com/theosakamg/picar_ros</url>
+  <url type="website">http://wiki.ros.org/picar</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <exec_depend>picar_bringup</exec_depend>
+
+</package>
