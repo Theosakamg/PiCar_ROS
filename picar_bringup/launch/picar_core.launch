@@ -1,0 +1,15 @@
+<launch>
+
+  <node  name="controller" pkg="picar_bringup" type="controller.py" respawn="true">
+
+  </node>
+
+  <node name="converter" pkg="picar_bringup" type="twist2ackermann.py" respawn="true">
+    <!-- <param name="twist_cmd_topic" value="/cmd_vel"/> -->
+    <!-- <param name="ackermann_cmd_topic" value="/ackermann_cmd"/> -->
+    <!-- <param name="wheelbase" value="10.0"/> -->
+    <!-- <param name="message_type" value="ackermann_drive_stamped"/> -->
+    <!-- <param name="frame_id" value="odom"/> -->
+  </node>
+
+</launch>

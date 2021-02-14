@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find picar_bringup)/launch/camera.launch" />
+  <include file="$(find picar_bringup)/launch/picar_core.launch" />
+</launch>

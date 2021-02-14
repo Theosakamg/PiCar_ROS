@@ -1,0 +1,12 @@
+
+  <!-- PiCar -->
+  <include file="$(find picar_bringup)/launch/picar-v.launch" />
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server">
+  </node>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+  </node>
+
+</launch>
