@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<robot name="picar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="body_mass" value="$(arg body_mass)"/>
+  <xacro:property name="body_width" value="$(arg body_width)"/>
+  <xacro:property name="body_length" value="$(arg body_length)"/>
+  <xacro:property name="body_height" value="$(arg body_height)"/>
+  <xacro:property name="body_offset" value="$(arg body_offset)"/>
+
+  
+  <xacro:property name="wheelbase" value="$(arg wheelbase)"/>
+  <xacro:property name="wheel_mass" value="$(arg wheel_mass)"/>
+  <xacro:property name="wheel_width" value="$(arg wheel_width)"/>
+  <xacro:property name="wheel_radius" value="$(arg wheel_radius)"/>
+
+  <xacro:property name="ground_clearance" value="$(arg ground_clearance)"/>
+
+</robot>

@@ -1,0 +1,248 @@
+<?xml version="1.0" ?>
+<robot name="picar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find picar_description)/urdf/config.urdf.xacro"/>
+  <xacro:include filename="$(find picar_description)/urdf/materials.urdf.xacro"/>
+
+  <!-- Start Baselink -->
+  <link name="base_link"/>
+
+  <link name="body">
+    <visual>
+      <origin xyz="${body_offset} 0.0 0.0"/>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="body"/>
+    </visual>
+    <collision>
+      <origin xyz="${body_offset} 0.0 0.0"/>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+     <inertial>
+      <origin xyz="0 0 ${body_height/2}" rpy="0 0 0"/>
+      <mass value="${body_mass}"/>
+      <inertia
+        ixx="${body_mass / 12.0 * (body_width*body_width + body_height*body_height)}" ixy="0.0" ixz="0.0"
+        iyy="${body_mass / 12.0 * (body_height*body_height + body_width*body_width)}" iyz="0.0"
+        izz="${body_mass / 12.0 * (body_width*body_width + body_width*body_width)}"/>
+    </inertial>
+  </link>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="body"/>
+  </joint>
+  <!-- End Baselink -->
+
+  <!-- Start Front -->
+    <!-- Start Front right -->
+      <!-- Start Join -->
+      <joint name="front_right_wheel_steering_joint" type="revolute">
+        <parent link="body"/>
+        <child link="front_right_wheel_steering"/>
+        <origin rpy="0 0 ${pi}" xyz="${wheelbase} 0.04 0"/>
+        <limit effort="5000" lower="-0.8" upper="0.8" velocity="1"/>
+        <axis xyz="0 0 1"/>
+        <dynamics damping="0.7" friction="0.1"/>
+      </joint>
+      <link name="front_right_wheel_steering">
+        <inertial>
+          <mass value="0.1"/>
+          <inertia ixx="5.6112500000000015e-05" ixy="0" ixz="0" iyy="5.6112500000000015e-05" iyz="0" izz="5.6112500000000015e-05"/>
+        </inertial>
+      </link>
+      <joint name="front_right_wheel_spinning_joint" type="continuous">
+        <origin rpy="${-pi/2} 0 0" xyz="0 -0.015 0"/>
+        <parent link="front_right_wheel_steering"/>
+        <child link="front_right_wheel_spinning"/>
+        <axis xyz="0 0 -1"/>
+      </joint>
+      <!-- End Join -->
+
+      <!-- Start Visual -->
+      <link name="front_right_wheel_spinning">
+        <visual>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+          <material name="rubber"/>
+        </visual>
+        <collision>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="${wheel_mass}"/>
+          <inertia ixx="0.00035556250000000003" ixy="0" ixz="0" iyy="0.00035556250000000003" iyz="0" izz="0.0005611250000000001"/>
+        </inertial>
+      </link>
+      <!-- End Visual -->
+
+      <!-- Start Transmission -->
+      <transmission name="front_right_wheel_steering_joint">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="front_right_wheel_steering_joint">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="front_right_wheel_steering_motor">
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+      </transmission>
+      <!-- End Transmission -->
+    <!-- End Front right -->
+
+    <!-- Start Front left -->
+      <!-- Start Join -->
+      <joint name="front_left_wheel_steering_joint" type="revolute">
+        <parent link="body"/>
+        <child link="front_left_wheel_steering"/>
+        <origin rpy="0 0 ${pi}" xyz="${wheelbase} -0.04 0"/>
+        <limit effort="5000" lower="-0.8" upper="0.8" velocity="1"/>
+        <axis xyz="0 0 1"/>
+        <dynamics damping="0.7" friction="0.1"/>
+      </joint>
+      <link name="front_left_wheel_steering">
+        <inertial>
+          <mass value="0.1"/>
+          <inertia ixx="5.6112500000000015e-05" ixy="0" ixz="0" iyy="5.6112500000000015e-05" iyz="0" izz="5.6112500000000015e-05"/>
+        </inertial>
+      </link>
+      <joint name="front_left_wheel_spinning_joint" type="continuous">
+        <origin rpy="${-pi/2} 0 0" xyz="0 0.015 0"/>
+        <parent link="front_left_wheel_steering"/>
+        <child link="front_left_wheel_spinning"/>
+        <axis xyz="0 0 -1"/>
+      </joint>
+      <!-- End Join -->
+
+      <!-- Start Visual -->
+      <link name="front_left_wheel_spinning">
+        <visual>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+          <material name="rubber"/>
+        </visual>
+        <collision>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="${wheel_mass}"/>
+          <inertia ixx="0.00035556250000000003" ixy="0" ixz="0" iyy="0.00035556250000000003" iyz="0" izz="0.0005611250000000001"/>
+        </inertial>
+      </link>
+      <!-- End Visual -->
+
+      <!-- Start Transmission -->
+      <transmission name="front_left_wheel_steering_joint">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="front_left_wheel_steering_joint">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="front_left_wheel_steering_motor">
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+      </transmission>
+      <!-- End Transmission -->
+    <!-- End Front left -->
+  <!-- End Front -->
+
+
+  <!-- Start Rear -->
+    <!-- Start Rear right -->
+      <!-- Start Join -->
+      <joint name="rear_right_wheel_spinning_joint" type="continuous">
+        <origin rpy="${-pi/2} 0 0" xyz="0 0.055 0"/>
+        <parent link="body"/>
+        <child link="rear_right_wheel_spinning"/>
+        <axis xyz="0 0 1"/>
+      </joint>
+      <!-- End Join -->
+
+      <!-- Start Visual -->
+      <link name="rear_right_wheel_spinning">
+        <visual>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+          <material name="rubber"/>
+        </visual>
+        <collision>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="${wheel_mass}"/>
+          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
+                  iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
+                  izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+        </inertial>
+      </link>
+      <!-- End Visual -->
+
+      <!-- Start Transmission -->
+      <transmission name="rear_right_wheel_spinning_joint">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="rear_right_wheel_spinning_joint">
+          <hardwareInterface>VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="rear_right_wheel_spinning_motor">
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+      </transmission>
+      <!-- End Transmission -->
+    <!-- End Rear right -->
+
+    <!-- Start Rear left -->
+      <!-- Start Join -->
+      <joint name="rear_left_wheel_spinning_joint" type="continuous">
+        <origin rpy="${-pi/2} 0 0" xyz="0 -0.055 0"/>
+        <parent link="body"/>
+        <child link="rear_left_wheel_spinning"/>
+        <axis xyz="0 0 1"/>
+      </joint>
+      <!-- End Join -->
+
+      <!-- Start Visual -->
+      <link name="rear_left_wheel_spinning">
+        <visual>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+          <material name="rubber"/>
+        </visual>
+        <collision>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="${wheel_mass}"/>
+          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
+                  iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
+                  izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+        </inertial>
+      </link>
+      <!-- End Visual -->
+
+      <!-- Start Transmission -->
+      <transmission name="rear_left_wheel_spinning_joint">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="rear_left_wheel_spinning_joint">
+          <hardwareInterface>VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="rear_left_wheel_spinning_motor">
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+      </transmission>
+      <!-- End Transmission -->
+    <!-- End Rear left -->
+  <!-- End Rear -->
+
+</robot>
