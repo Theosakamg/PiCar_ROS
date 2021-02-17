@@ -4,6 +4,12 @@
   <xacro:include filename="$(find picar_description)/urdf/config.urdf.xacro"/>
   <xacro:include filename="$(find picar_description)/urdf/materials.urdf.xacro"/>
 
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/picar</robotNamespace>
+    </plugin>
+  </gazebo>
+
   <!-- Start Baselink -->
   <link name="base_link"/>
 
@@ -25,9 +31,9 @@
       <origin xyz="0 0 ${body_height/2}" rpy="0 0 0"/>
       <mass value="${body_mass}"/>
       <inertia
-        ixx="${body_mass / 12.0 * (body_width*body_width + body_height*body_height)}" ixy="0.0" ixz="0.0"
-        iyy="${body_mass / 12.0 * (body_height*body_height + body_width*body_width)}" iyz="0.0"
-        izz="${body_mass / 12.0 * (body_width*body_width + body_width*body_width)}"/>
+        ixx="${body_mass / 12.0 * (body_height*body_height + body_length*body_length)}" ixy="0.0" ixz="0.0"
+        iyy="${body_mass / 12.0 * (body_width*body_width + body_length*body_length)}" iyz="0.0"
+        izz="${body_mass / 12.0 * (body_width*body_width + body_height*body_height)}"/>
     </inertial>
   </link>
   <joint name="base_joint" type="fixed">
@@ -54,7 +60,7 @@
         </inertial>
       </link>
       <joint name="front_right_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 -0.015 0"/>
+        <origin rpy="${-pi/2} 0 0" xyz="0 ${-wheel_width/2} 0"/>
         <parent link="front_right_wheel_steering"/>
         <child link="front_right_wheel_spinning"/>
         <axis xyz="0 0 -1"/>
@@ -76,7 +82,9 @@
         </collision>
         <inertial>
           <mass value="${wheel_mass}"/>
-          <inertia ixx="0.00035556250000000003" ixy="0" ixz="0" iyy="0.00035556250000000003" iyz="0" izz="0.0005611250000000001"/>
+          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
+                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
+                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -111,7 +119,7 @@
         </inertial>
       </link>
       <joint name="front_left_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 0.015 0"/>
+        <origin rpy="${-pi/2} 0 0" xyz="0 ${wheel_width/2} 0"/>
         <parent link="front_left_wheel_steering"/>
         <child link="front_left_wheel_spinning"/>
         <axis xyz="0 0 -1"/>
@@ -133,7 +141,9 @@
         </collision>
         <inertial>
           <mass value="${wheel_mass}"/>
-          <inertia ixx="0.00035556250000000003" ixy="0" ixz="0" iyy="0.00035556250000000003" iyz="0" izz="0.0005611250000000001"/>
+          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
+                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
+                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -180,8 +190,8 @@
         <inertial>
           <mass value="${wheel_mass}"/>
           <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
-                  iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
-                  izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
+                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -225,8 +235,8 @@
         <inertial>
           <mass value="${wheel_mass}"/>
           <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
-                  iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
-                  izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
+                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->

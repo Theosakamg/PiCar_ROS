@@ -1,0 +1,32 @@
+<launch>
+  <arg name="model" default="$(find picar_description)/urdf/picar.urdf.xacro"/>
+  <arg name="rvizconfig" default="$(find picar_description)/rviz/simu.rviz" />
+
+  <include file="$(find picar_description)/launch/gazebo.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz"  args="-d $(arg rvizconfig)" />
+
+  <rosparam command="load"
+            file="$(find picar_description)/config/joints.yaml"
+            ns="/picar" />
+
+
+  <node name="picar_controller_spawner" pkg="controller_manager" type="spawner"
+        ns="/picar"
+        args="joint_state_controller
+              rear_left_wheel_spinning_position_controller
+              rear_right_wheel_spinning_position_controller
+              front_left_wheel_steering_position_controller
+              front_right_wheel_steering_position_controller
+              --shutdown-timeout 3"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+    <remap from="/joint_states" to="/picar/joint_states" />
+  </node>
+        
+  <!-- <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+    <param name="default_topic" value="/picar_diff_drive_controller/cmd_vel"/>
+  </node> -->
+</launch>
