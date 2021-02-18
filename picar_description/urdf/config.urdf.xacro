@@ -10,14 +10,14 @@
   <xacro:arg name="wheelbase"     default="0.140"/>
 
   <!-- Rear wheel -->
-  <xacro:arg name="wheel_mass"    default="0.025"/>
-  <xacro:arg name="wheel_width"   default="0.0255"/>
-  <xacro:arg name="wheel_radius"  default="0.0335"/>
+  <xacro:arg name="wheel_rear_mass"    default="0.025"/>
+  <xacro:arg name="wheel_rear_width"   default="0.0255"/>
+  <xacro:arg name="wheel_rear_radius"  default="0.0335"/>
 
   <!-- Rear wheel -->
-  <xacro:arg name="wheel_mass"    default="0.023"/>
-  <xacro:arg name="wheel_width"   default="0.026"/>
-  <xacro:arg name="wheel_radius"  default="0.0335"/>
+  <xacro:arg name="wheel_front_mass"    default="0.023"/>
+  <xacro:arg name="wheel_front_width"   default="0.026"/>
+  <xacro:arg name="wheel_front_radius"  default="0.0335"/>
 
   <xacro:arg name="ground_clearance" default="0.2"/>
 

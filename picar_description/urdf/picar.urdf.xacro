@@ -7,26 +7,39 @@
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/picar</robotNamespace>
+      <!-- <robotSimType>steer_bot_hardware_gazebo/SteerBotHardwareGazebo</robotSimType> Not maintening -->
+      <!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
     </plugin>
   </gazebo>
 
+  <link name="world"/>
+
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
+
   <!-- Start Baselink -->
-  <link name="base_link"/>
+  <link name="base_link" >
+    <gazebo>
+      <material>Gazebo/Orange</material>
+    </gazebo>
+  </link>
 
   <link name="body">
     <visual>
-      <origin xyz="0.0 0.0 ${-0.029/2}"/>
+      <origin xyz="0.0 0.0 ${-body_height/2}"/>
+      <!-- ${body_offset} -->
       <geometry>
-        <!-- <box size="${body_length} ${body_width} ${body_height}" scale="0.001 0.001 0.001"/> -->
-        <mesh filename="package://picar_description/meshes/Chassis.dae"/>
+        <!-- <box size="${body_length} ${body_width} ${body_height}"/> -->
+        <mesh filename="package://picar_description/meshes/Chassis.dae" />
       </geometry>
       <material name="body"/>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 ${-0.029/2}"/>
+      <origin xyz="0.0 0.0 ${-body_height/2}"/>
       <geometry>
-        <!-- <box size="${body_length} ${body_width} ${body_height}"/> -->
-        <mesh filename="package://picar_description/meshes/Chassis.dae"/>
+        <mesh filename="package://picar_description/meshes/Chassis.dae" />
       </geometry>
     </collision>
      <inertial>
@@ -62,7 +75,7 @@
         </inertial>
       </link>
       <joint name="front_right_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 ${-wheel_width/2} 0"/>
+        <origin rpy="${-pi/2} 0 0" xyz="0 ${-wheel_front_width/2} 0"/>
         <parent link="front_right_wheel_steering"/>
         <child link="front_right_wheel_spinning"/>
         <axis xyz="0 0 -1"/>
@@ -73,22 +86,22 @@
       <link name="front_right_wheel_spinning">
         <visual>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelFrontRight.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelFrontRight.dae"/>
           </geometry>
         </collision>
         <inertial>
-          <mass value="${wheel_mass}"/>
-          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
-                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+          <mass value="${wheel_front_mass}"/>
+          <inertia ixx="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" ixy="0" ixz="0"
+                   iyy="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" iyz="0"
+                   izz="${wheel_front_mass*wheel_front_radius*wheel_front_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -123,7 +136,7 @@
         </inertial>
       </link>
       <joint name="front_left_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 ${wheel_width/2} 0"/>
+        <origin rpy="${-pi/2} 0 0" xyz="0 ${wheel_front_width/2} 0"/>
         <parent link="front_left_wheel_steering"/>
         <child link="front_left_wheel_spinning"/>
         <axis xyz="0 0 -1"/>
@@ -134,22 +147,22 @@
       <link name="front_left_wheel_spinning">
         <visual>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelFrontLeft.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelFrontLeft.dae"/>
           </geometry>
         </collision>
         <inertial>
-          <mass value="${wheel_mass}"/>
-          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
-                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+          <mass value="${wheel_front_mass}"/>
+          <inertia ixx="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" ixy="0" ixz="0"
+                   iyy="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" iyz="0"
+                   izz="${wheel_front_mass*wheel_front_radius*wheel_front_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -184,22 +197,22 @@
       <link name="rear_right_wheel_spinning">
         <visual>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelRearRight.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelRearRight.dae"/>
           </geometry>
         </collision>
         <inertial>
-          <mass value="${wheel_mass}"/>
-          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
-                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+          <mass value="${wheel_rear_mass}"/>
+          <inertia ixx="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" ixy="0" ixz="0"
+                   iyy="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" iyz="0"
+                   izz="${wheel_rear_mass*wheel_rear_radius*wheel_rear_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -211,6 +224,7 @@
           <hardwareInterface>VelocityJointInterface</hardwareInterface>
         </joint>
         <actuator name="rear_right_wheel_spinning_motor">
+          <hardwareInterface>VelocityJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
       </transmission>
@@ -231,22 +245,22 @@
       <link name="rear_left_wheel_spinning">
         <visual>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelRearLeft.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
             <mesh filename="package://picar_description/meshes/WheelRearLeft.dae"/>
           </geometry>
         </collision>
         <inertial>
-          <mass value="${wheel_mass}"/>
-          <inertia ixx="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_mass*(3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}" iyz="0"
-                   izz="${wheel_mass*wheel_radius*wheel_radius/2.0}"/>
+          <mass value="${wheel_rear_mass}"/>
+          <inertia ixx="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" ixy="0" ixz="0"
+                   iyy="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" iyz="0"
+                   izz="${wheel_rear_mass*wheel_rear_radius*wheel_rear_radius/2.0}"/>
         </inertial>
       </link>
       <!-- End Visual -->
@@ -258,6 +272,7 @@
           <hardwareInterface>VelocityJointInterface</hardwareInterface>
         </joint>
         <actuator name="rear_left_wheel_spinning_motor">
+          <hardwareInterface>VelocityJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
       </transmission>
