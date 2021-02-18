@@ -15,16 +15,18 @@
 
   <link name="body">
     <visual>
-      <origin xyz="${body_offset} 0.0 0.0"/>
+      <origin xyz="0.0 0.0 ${-0.029/2}"/>
       <geometry>
-        <box size="${body_length} ${body_width} ${body_height}"/>
+        <!-- <box size="${body_length} ${body_width} ${body_height}" scale="0.001 0.001 0.001"/> -->
+        <mesh filename="package://picar_description/meshes/Chassis.dae"/>
       </geometry>
       <material name="body"/>
     </visual>
     <collision>
-      <origin xyz="${body_offset} 0.0 0.0"/>
+      <origin xyz="0.0 0.0 ${-0.029/2}"/>
       <geometry>
-        <box size="${body_length} ${body_width} ${body_height}"/>
+        <!-- <box size="${body_length} ${body_width} ${body_height}"/> -->
+        <mesh filename="package://picar_description/meshes/Chassis.dae"/>
       </geometry>
     </collision>
      <inertial>
@@ -48,7 +50,7 @@
       <joint name="front_right_wheel_steering_joint" type="revolute">
         <parent link="body"/>
         <child link="front_right_wheel_steering"/>
-        <origin rpy="0 0 ${pi}" xyz="${wheelbase} 0.04 0"/>
+        <origin rpy="0 0 ${pi}" xyz="${wheelbase} 0.048 0"/>
         <limit effort="5000" lower="-0.8" upper="0.8" velocity="1"/>
         <axis xyz="0 0 1"/>
         <dynamics damping="0.7" friction="0.1"/>
@@ -71,13 +73,15 @@
       <link name="front_right_wheel_spinning">
         <visual>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelFrontRight.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
             <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <mesh filename="package://picar_description/meshes/WheelFrontRight.dae"/>
           </geometry>
         </collision>
         <inertial>
@@ -107,7 +111,7 @@
       <joint name="front_left_wheel_steering_joint" type="revolute">
         <parent link="body"/>
         <child link="front_left_wheel_steering"/>
-        <origin rpy="0 0 ${pi}" xyz="${wheelbase} -0.04 0"/>
+        <origin rpy="0 0 ${pi}" xyz="${wheelbase} -0.048 0"/>
         <limit effort="5000" lower="-0.8" upper="0.8" velocity="1"/>
         <axis xyz="0 0 1"/>
         <dynamics damping="0.7" friction="0.1"/>
@@ -130,13 +134,15 @@
       <link name="front_left_wheel_spinning">
         <visual>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelFrontLeft.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelFrontLeft.dae"/>
           </geometry>
         </collision>
         <inertial>
@@ -178,13 +184,15 @@
       <link name="rear_right_wheel_spinning">
         <visual>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelRearRight.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelRearRight.dae"/>
           </geometry>
         </collision>
         <inertial>
@@ -223,13 +231,15 @@
       <link name="rear_left_wheel_spinning">
         <visual>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelRearLeft.dae"/>
           </geometry>
           <material name="rubber"/>
         </visual>
         <collision>
           <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            <!-- <cylinder length="${wheel_width}" radius="${wheel_radius}"/> -->
+            <mesh filename="package://picar_description/meshes/WheelRearLeft.dae"/>
           </geometry>
         </collision>
         <inertial>
