@@ -57,7 +57,7 @@ class Throttle(object):
                               0,
                               4095))
 
-    self._debug_("Value: %f°\tPulse : %dus" % (value, pulse_wide))
+    self._debug_("Value: %f%%\tPulse : %dus" % (value, pulse_wide))
 
     return pulse_wide
 

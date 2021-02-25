@@ -18,7 +18,7 @@ class Twist2Ackermann(object):
         # Load Parameters.
         self.twist_cmd_topic = rospy.get_param('~twist_cmd_topic', '/cmd_vel') 
         self.ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/ackermann_cmd')
-        self.wheelbase = rospy.get_param('~wheelbase', 10.0)
+        self.wheelbase = float(rospy.get_param('~wheelbase', 0.14))
         self.frame_id = rospy.get_param('~frame_id', 'odom')
         self.message_type = rospy.get_param('~message_type', 'ackermann_drive_stamped') # ackermann_drive or ackermann_drive_stamped
 
@@ -42,20 +42,24 @@ class Twist2Ackermann(object):
         return steering_angle
 
     def cmd_callback(self, data):
+        rospy.logdebug("convert...")
         steering = self.convert_trans_rot_vel_to_steering_angle(data.linear.x,
                                                                 data.angular.z)
 
         if TYPE_ACKERMANN == self.message_type:
             msg = AckermannDrive()
-            msg.steering_angle = steering
-            msg.speed = data.linear.x
+            msg.steering_angle = steering                   # in rad
+            msg.speed = data.linear.x                       # in m/s
+            msg.acceleration = data.linear.x                # in m/s^2
 
         else:
             msg = AckermannDriveStamped()
             msg.header.stamp = rospy.Time.now()
             msg.header.frame_id = self.frame_id
-            msg.drive.steering_angle = steering
-            msg.drive.speed = data.linear.x
+            msg.drive.steering_angle = steering             # in rad
+            msg.drive.steering_angle_velocity = steering    # in rad/s
+            msg.drive.speed = data.linear.x                 # in m/s
+            msg.drive.acceleration = data.linear.x          # in m/s^2
             
         self.pub.publish(msg)
 
