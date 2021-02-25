@@ -8,6 +8,8 @@ from components import Servo, Throttle
 from ackermann_msgs.msg import AckermannDriveStamped
 from ackermann_msgs.msg import AckermannDrive
 from dynamic_reconfigure.server import Server as DynamicReconfigureServer
+from picar_bringup.cfg import PicarConfig
+
 
 NODE_NAME = 'picar_controller'
 TYPE_ACKERMANN = 'ackermann_drive'
@@ -58,6 +60,8 @@ class PicarNode(object):
         self.ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/ackermann_cmd')
         self.message_type = rospy.get_param('~message_type', 'ackermann_drive_stamped') # ackermann_drive or ackermann_drive_stamped
 
+        self.srv = Server(PicarConfig, self.dynrec_callback)
+
         # Create topics (publisher & subscriber).
         rospy.Subscriber(self.ackermann_cmd_topic, AckermannDriveStamped, self.cmd_callback, queue_size=1)
 
@@ -101,6 +105,11 @@ class PicarNode(object):
 
     def cmd_callback(self, msg):
         self.msg = msg
+
+    def dynrec_callback(self, level):
+        rospy.loginfo("""Reconfigure Request: {steering_offset}""".format(**config))
+        self.servo.offset = config.steering_offset
+        return config
 
 # Main function.
 if __name__ == '__main__':

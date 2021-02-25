@@ -1,0 +1,31 @@
+<launch>
+  <arg name="joy_config" default="ps3" />
+  <arg name="joy_dev" default="/dev/input/js0" />
+
+  <arg name="teleop_config_filepath" default="$(find picar_teleop)/config/$(arg joy_config).config.yaml" />
+  <arg name="diag_config_filepath" default="$(find ps3joy)/diagnostics.yaml" />
+
+  <arg name="joy_topic" default="joy" />
+  <arg name="vel_topic" default="cmd_vel" />
+
+  <!-- PS3 driver node -->
+  <node pkg="joy" type="joy_node" name="ps3_joy" output="screen" >
+    <param name="dev" type="string" value="$(arg joy_dev)" />
+    <param name="deadzone" value="0.12" />
+    <param name="autorepeat_rate" value="20" />
+    <remap from="joy" to="$(arg joy_topic)" />
+  </node>
+
+  <!-- PS3 State diag (batter -->
+  <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
+    <rosparam command="load" file="$(arg diag_config_filepath)" />
+  </node>
+
+  <!-- Convert joy to cmd_vel-->
+  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+    <rosparam command="load" file="$(arg teleop_config_filepath)" />
+    <remap from="joy" to="$(arg joy_topic)" />
+    <remap from="cmd_vel" to="$(arg vel_topic)" />
+  </node>
+
+</launch>

@@ -14,4 +14,8 @@
   <depend>geometry_msgs</depend>
   <depend>rospy</depend>
 
+  <depend>joy</depend>
+  <depend>ps3joy</depend>
+  <depend>teleop-twist-joy</depend>
+
 </package>
