@@ -1,10 +1,10 @@
 <launch>
 
-  <node  name="controller" pkg="picar_bringup" type="controller.py" respawn="true">
+  <node pkg="picar_bringup" type="controller.py"  name="driver_car" respawn="true">
 
   </node>
 
-  <node name="converter" pkg="picar_bringup" type="twist2ackermann.py" respawn="true">
+  <node pkg="picar_bringup" type="twist2ackermann.py" name="converter"  respawn="true">
     <!-- <param name="twist_cmd_topic" value="/cmd_vel"/> -->
     <!-- <param name="ackermann_cmd_topic" value="/ackermann_cmd"/> -->
     <!-- <param name="wheelbase" value="10.0"/> -->
