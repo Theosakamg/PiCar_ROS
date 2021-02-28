@@ -9,7 +9,7 @@
     <param name="camera_frame_id" value="camera"/>
   </node>
 
-  <node pkg="picar_bringup" type="controller.py" name="driver_cammotor" respawn="true">
+  <node pkg="picar_bringup" type="cammotor.py" name="driver_cammotor" respawn="true">
 
   </node>
 

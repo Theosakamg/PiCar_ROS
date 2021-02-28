@@ -16,6 +16,7 @@ from ackermann_msgs.msg import AckermannDrive
 from dynamic_reconfigure.server import Server as DynamicReconfigureServer
 from picar_bringup.cfg import PicarConfig
 
+import odom
 
 NODE_NAME = 'picar_controller'
 TYPE_ACKERMANN = 'ackermann_drive'
@@ -65,7 +66,7 @@ class PicarNode(object):
 
         # Load Parameters.
         self.arg_wheel_diameter = float(rospy.get_param('~wheel_diameter', 0.067))
-        self.arg_motor_speed_max = int(rospy.get_param('~motor_speed_max', 195))
+        self.arg_motor_speed_max = int(rospy.get_param('~motor_speed_max', 162)) # empty : 195 (mesured)
 
         if self.arg_wheel_diameter <= 0:
             rospy.logwarn("Weel diameter can be < 0 meter !")
@@ -76,7 +77,7 @@ class PicarNode(object):
             self.arg_motor_speed_max = 200
 
         # convert max RPM to RPS (x/60), apply RPS to perimeter, to ratio for per cent.
-        self.motor_ratio = ((float(self.arg_motor_speed_max)/60)*self.arg_wheel_diameter)/100
+        self.motor_ratio = ((float(self.arg_motor_speed_max)/60)*(self.arg_wheel_diameter*math.pi))/100
         rospy.loginfo("Motor ratio : %f (wheel %f, motor speed %d)", self.motor_ratio, self.arg_wheel_diameter, self.arg_motor_speed_max)
 
         self.ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/ackermann_cmd')
@@ -86,6 +87,8 @@ class PicarNode(object):
 
         # Create topics (publisher & subscriber).
         rospy.Subscriber(self.ackermann_cmd_topic, AckermannDriveStamped, self.cmd_callback, queue_size=1)
+
+        self.odomNode = odom.PicarToOdom()
 
         # Start main loop
         self.thread = threading.Thread(target=self.__loop, args=())
@@ -103,6 +106,8 @@ class PicarNode(object):
 
     def __loop(self):
         while(self.is_running):
+            self.msg.header.stamp = rospy.Time.now()
+
             # Manage Direction
             steering_angle = self.msg.drive.steering_angle
             if(steering_angle > 0.1 or steering_angle < -0.1):
@@ -132,6 +137,7 @@ class PicarNode(object):
             self.motorA.speed = motor_speed
             self.motorB.speed = motor_speed
 
+            self.odomNode.stateCallback(self.msg)
             ## Sleep
             time.sleep(1/self.freq)
 
@@ -144,7 +150,7 @@ class PicarNode(object):
         return config
 
     def emergency(self):
-        self.vel = Twist()
+        self.vel = AckermannDriveStamped()
         self.motorA.speed = 0
         self.motorB.speed = 0
         self.is_running = False
