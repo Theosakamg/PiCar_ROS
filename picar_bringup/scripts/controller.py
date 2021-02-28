@@ -34,7 +34,6 @@ DIR_MAX = 150
 class PicarNode(object):
 
     msg = AckermannDriveStamped()
-    freq = 50
     is_running = True
 
     def __init__(self):
@@ -65,6 +64,7 @@ class PicarNode(object):
         rospy.init_node(NODE_NAME)
 
         # Load Parameters.
+        self.rate = float(rospy.get_param('~rate', 50.0))
         self.arg_wheel_diameter = float(rospy.get_param('~wheel_diameter', 0.067))
         self.arg_motor_speed_max = int(rospy.get_param('~motor_speed_max', 162)) # empty : 195 (mesured)
 
@@ -90,22 +90,15 @@ class PicarNode(object):
 
         self.odomNode = odom.PicarToOdom()
 
-        # Start main loop
-        self.thread = threading.Thread(target=self.__loop, args=())
-        self.thread.start()
-
-        # loop for process.
         rospy.loginfo("Node '%s' started.\nListening to %s", NODE_NAME, self.ackermann_cmd_topic)
-        try:
-            rospy.spin()
-        except KeyboardInterrupt:
-            self.emergency()
 
     def __del__(self):
         self.emergency()
 
-    def __loop(self):
-        while(self.is_running):
+    def spin(self):
+        r = rospy.Rate(self.rate)
+        while not rospy.is_shutdown():
+            #while(self.is_running):
             self.msg.header.stamp = rospy.Time.now()
 
             # Manage Direction
@@ -138,8 +131,9 @@ class PicarNode(object):
             self.motorB.speed = motor_speed
 
             self.odomNode.stateCallback(self.msg)
+
             ## Sleep
-            time.sleep(1/self.freq)
+            r.sleep()
 
     def cmd_callback(self, msg):
         self.msg = msg
@@ -157,7 +151,8 @@ class PicarNode(object):
 
 # Main function.
 if __name__ == '__main__':
-    # Go to class functions that do all the heavy lifting. Do error checking.
     try:
         ne = PicarNode()
-    except rospy.ROSInterruptException: pass
+        ne.spin()
+    except rospy.ROSInterruptException:
+        ne.emergency()

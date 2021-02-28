@@ -20,11 +20,16 @@ NODE_NAME = 'camera_controller'
 class CameraMotorNode(object):
 
     msg = Twist()
-    freq = 25
     is_running = True
 
     def __init__(self):
         atexit.register(self.exist)
+
+        # Initialize the node and name it.
+        rospy.init_node(NODE_NAME)
+
+        self.rate = float(rospy.get_param('~rate', 20.0))
+        self.cmd_topic = rospy.get_param('~cameramotor_cmd_topic', '/cam_vel')
 
         # Initialize servo
         self.servo_yaw = Servo.Servo(CHN_PWM_CAM_YAW)
@@ -43,25 +48,14 @@ class CameraMotorNode(object):
         self.servo_yaw.default()
         self.servo_pitch.default()
 
-        # Initialize the node and name it.
-        rospy.init_node(NODE_NAME)
-        self.cmd_topic = "/cam_vel"
-
         # Create topics (publisher & subscriber).
         rospy.Subscriber(self.cmd_topic, Twist, self.cmd_callback, queue_size=1)
 
-        # Start main loop
-        self.thread = threading.Thread(target=self.__loop, args=())
-        self.thread.start()
-
         # loop for process.
         rospy.loginfo("Node '%s' started.\nListening to %s", NODE_NAME, self.cmd_topic)
-        try:
-            rospy.spin()
-        except KeyboardInterrupt:
-            self.emergency()
 
-    def __loop(self):
+    def spin(self):
+        r = rospy.Rate(self.rate)
         while(self.is_running):
             # Manage Yaw
             yaw = self.msg.angular.z
@@ -82,7 +76,7 @@ class CameraMotorNode(object):
                 self.servo_pitch.default()
 
             ## Sleep
-            time.sleep(1/self.freq)
+            r.sleep()
 
     def cmd_callback(self, msg):
         #rospy.loginfo("Receive twist %s", msg)
@@ -96,7 +90,8 @@ class CameraMotorNode(object):
 
 # Main function.
 if __name__ == '__main__':
-    # Go to class functions that do all the heavy lifting. Do error checking.
     try:
         ne = CameraMotorNode()
-    except rospy.ROSInterruptException: pass
+        ne.spin()
+    except rospy.ROSInterruptException:
+        ne.emergency()
