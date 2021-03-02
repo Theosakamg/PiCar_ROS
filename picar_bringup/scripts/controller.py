@@ -55,6 +55,10 @@ class PicarNode(object):
         self.motorA = TB6612.Motor(GPIO_MOTOR_ROT_A, pwm=self.throttle_a.write, offset=False)
         self.motorB = TB6612.Motor(GPIO_MOTOR_ROT_B, pwm=self.throttle_b.write, offset=False)
 
+        # Encoder sensor
+        self.encoderA = Sensor.SensorDigitalCount(20)
+        self.encoderB = Sensor.SensorDigitalCount(21)
+
         # Set origin
         self.servo.default()
         self.motorA.speed = 0
@@ -65,6 +69,7 @@ class PicarNode(object):
 
         # Load Parameters.
         self.rate = float(rospy.get_param('~rate', 50.0))
+        self.arg_encoder_pulse = float(rospy.get_param('~encoder_pulse', 19))
         self.arg_wheel_diameter = float(rospy.get_param('~wheel_diameter', 0.067))
         self.arg_motor_speed_max = int(rospy.get_param('~motor_speed_max', 162)) # empty : 195 (mesured)
 
@@ -88,7 +93,8 @@ class PicarNode(object):
         # Create topics (publisher & subscriber).
         rospy.Subscriber(self.ackermann_cmd_topic, AckermannDriveStamped, self.cmd_callback, queue_size=1)
 
-        self.odomNode = odom.PicarToOdom()
+        distance_pulse = (self.arg_wheel_diameter*math.pi)/self.arg_encoder_pulse
+        self.odomNode = odom.PicarToOdom(self.encoderA, self.encoderB, distance_pulse)
 
         rospy.loginfo("Node '%s' started.\nListening to %s", NODE_NAME, self.ackermann_cmd_topic)
 
@@ -130,7 +136,7 @@ class PicarNode(object):
             self.motorA.speed = motor_speed
             self.motorB.speed = motor_speed
 
-            self.odomNode.stateCallback(self.msg)
+            self.odomNode.state_callback(self.msg)
 
             ## Sleep
             r.sleep()

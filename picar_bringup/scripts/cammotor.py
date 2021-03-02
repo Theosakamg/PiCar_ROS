@@ -56,7 +56,7 @@ class CameraMotorNode(object):
 
     def spin(self):
         r = rospy.Rate(self.rate)
-        while(self.is_running):
+        while not rospy.is_shutdown():
             # Manage Yaw
             yaw = self.msg.angular.z
             if(yaw > 0.1 or yaw < -0.1):
