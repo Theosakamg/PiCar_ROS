@@ -32,19 +32,21 @@ class SensorDigitalCount(SensorDigital):
 
     GPIO.add_event_detect(self._channel, GPIO.RISING)
     GPIO.add_event_callback(self._channel, self.__callback)
+    self.reset()
 
-  def reset():
+  def reset(self):
     self._count_low = 0
     self._count_high = 0
 
   def __callback (self, channel):
+    # print("tick %s state %s", channel, GPIO.input(channel))
     if (GPIO.input(channel) == GPIO.LOW):
       self._count_low += 1
-    else
+    else:
       self._count_high += 1
 
   def count_high(self):
     return self._count_high
-  
+
   def count_low(self):
     return self._count_low

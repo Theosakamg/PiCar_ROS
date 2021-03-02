@@ -6,9 +6,8 @@ import time
 import math
 import atexit
 
-from drivers import PCA9685
-from drivers import TB6612
-from components import Servo, Throttle
+from drivers import PCA9685, TB6612
+from components import Servo, Throttle, Sensor
 
 from ackermann_msgs.msg import AckermannDriveStamped
 from ackermann_msgs.msg import AckermannDrive
@@ -57,7 +56,7 @@ class PicarNode(object):
 
         # Encoder sensor
         self.encoderA = Sensor.SensorDigitalCount(20)
-        self.encoderB = Sensor.SensorDigitalCount(21)
+        self.encoderB = Sensor.SensorDigitalCount(16)
 
         # Set origin
         self.servo.default()
@@ -76,7 +75,7 @@ class PicarNode(object):
         if self.arg_wheel_diameter <= 0:
             rospy.logwarn("Weel diameter can be < 0 meter !")
             self.arg_wheel_diameter = 0.067
-        
+
         if self.arg_motor_speed_max <= 0:
             rospy.logwarn("Motor max speed can be < 0 meter !")
             self.arg_motor_speed_max = 200

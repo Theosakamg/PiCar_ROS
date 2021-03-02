@@ -4,7 +4,9 @@ import rospy
 import math
 
 import tf2_ros
+import tf_conversions
 
+from std_srvs.srv import Empty
 from nav_msgs.msg import Odometry
 from ackermann_msgs.msg import AckermannDriveStamped
 from geometry_msgs.msg import TransformStamped, Quaternion
@@ -60,7 +62,7 @@ class PicarToOdom(object):
         if (self._publish_tf):
             self.broadcaster = tf2_ros.TransformBroadcaster()
 
-        self._reset_service = rospy.Service('odom_reset', std_srvs.srv.Empty, self.odom_reset_cb)
+        self._reset_service = rospy.Service('odom_reset', Empty, self.odom_reset_cb)
 
         # subscribe to picar state.
         # vesc_state_sub_ = nh.subscribe("sensors/core", 10, &VescToOdom::vescStateCallbac_c, this);
@@ -68,7 +70,7 @@ class PicarToOdom(object):
         #     servo_sub_ = nh.subscribe("sensors/servo_position_command", 10,
         #                             &VescToOdom::servoCmdCallback, this);
         # }
-    
+
     def odom_reset_cb(self, req):
         self.x = 0.0
         self.y = 0.0
@@ -87,6 +89,8 @@ class PicarToOdom(object):
         # use current state as last state if this is our first time here
         if (not hasattr(self, '_last_state')):
             self._last_state = state;
+            self._last_encoder_left = self.sensorA.count_high()
+            self._last_encoder_right = self.sensorB.count_high()
 
         # calc elapsed time
         dt = state.header.stamp - self._last_state.header.stamp;
@@ -113,12 +117,23 @@ class PicarToOdom(object):
         tick_b = self.sensorB.count_high()
         delta_tick_a = tick_a - self._last_encoder_left
         delta_tick_b = tick_b - self._last_encoder_right
-        v_left  = delta_tick_a * self.distance_pulse / dt.to_sec()
-        v_right = delta_tick_b * self.distance_pulse / dt.to_sec()
-        delta_distance = 0.5f * (double)(delta_tick_a + delta_tick_B) * self.distance_pulse
-        delta_x = delta_distance * (double)math.cos(self._yaw)
-        delta_y = delta_distance * (double)math.sin(self._yaw)
-        delta_th = (double)(delta_tick_b - delta_tick_a) * self.distance_pulse / 0.36f  # Distance between the two wheels is 0.36m
+        if (dt.to_sec() != 0):
+            v_left  = delta_tick_a * self.distance_pulse / dt.to_sec()
+            v_right = delta_tick_b * self.distance_pulse / dt.to_sec()
+        else:
+            v_left  = -1
+            v_right = -1
+        delta_distance = 0.5 * float(delta_tick_a + delta_tick_b) * self.distance_pulse
+        delta_x = delta_distance * math.cos(self._yaw)
+        delta_y = delta_distance * math.sin(self._yaw)
+        delta_th = float(delta_tick_b - delta_tick_a) * self.distance_pulse / 0.08  # Distance between the two wheels is 0.36m
+
+        rospy.loginfo("DEBUG tick \tA:%f \tB:%f delta \tA:%f \tB:%f ",
+            tick_a,
+            tick_b,
+            delta_tick_a,
+            delta_tick_b
+            )
 
         rospy.loginfo("WHEEL Speed \tA:%f \tB:%f \tdelta X:%f Y:%f TH:%f",
             v_left,
@@ -147,7 +162,12 @@ class PicarToOdom(object):
 
         # Common
         self._current_time = rospy.Time.now()
-        self._quaternon = tf_conversions.transformations.quaternion_from_euler(0, 0, self._yaw)
+        #self._quaternon = tf_conversions.transformations.quaternion_from_euler(0, 0, self._yaw)
+        self._quaternon = Quaternion()
+        self._quaternon.x = 0.0
+        self._quaternon.y = 0.0
+        self._quaternon.z = math.sin(self._yaw/2.0)
+        self._quaternon.w = math.cos(self._yaw/2.0)
 
         # publish odometry message
         odom = Odometry()
@@ -160,10 +180,6 @@ class PicarToOdom(object):
         odom.pose.pose.position.y   = self._y
         odom.pose.pose.position.z   = 0.0
         odom.pose.pose.orientation  = self._quaternon
-        #odom.pose.pose.orientation.x = 0.0
-        #odom.pose.pose.orientation.y = 0.0
-        #odom.pose.pose.orientation.z = math.sin(self._yaw/2.0)
-        #odom.pose.pose.orientation.w = math.cos(self._yaw/2.0)
 
         # Position uncertainty
         # @todo Think about position uncertainty, perhaps get from parameters? */
