@@ -44,6 +44,7 @@ class PicarToOdom(object):
     #boost::shared_ptr<tf::TransformBroadcaster> tf_pub_;
 
     def __init__(self, sensorA, sensorB, distance_pulse):
+        self._first_loop = True
         self._odom_frame = "odom"
         self._base_frame = "base_link"
         self._publish_tf = True
@@ -87,7 +88,8 @@ class PicarToOdom(object):
         current_angular_velocity = state.drive.steering_angle_velocity
 
         # use current state as last state if this is our first time here
-        if (not hasattr(self, '_last_state')):
+        if (self._first_loop):
+            self._first_loop = False
             self._last_state = state;
             self._last_encoder_left = self.sensorA.count_high()
             self._last_encoder_right = self.sensorB.count_high()
