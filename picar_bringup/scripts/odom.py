@@ -124,6 +124,8 @@ class PicarToOdom(object):
             v_left  = -1
             v_right = -1
         delta_distance = 0.5 * float(delta_tick_a + delta_tick_b) * self.distance_pulse
+        if (current_speed < 0):
+            delta_distance = -delta_distance
         delta_x = delta_distance * math.cos(self._yaw)
         delta_y = delta_distance * -math.sin(self._yaw)
         delta_th = float(delta_tick_b - delta_tick_a) * self.distance_pulse / 0.109  # Track = distance between both wheels starting from the middle of rubber tread (26mm).
