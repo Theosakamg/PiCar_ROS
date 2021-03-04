@@ -84,85 +84,89 @@ class PicarToOdom(object):
     def state_callback(self, state):
         # convert to engineering units
         current_speed = state.drive.speed
-        current_steering_angle = state.drive.steering_angle
         current_angular_velocity = state.drive.steering_angle_velocity
 
         # use current state as last state if this is our first time here
         if (self._first_loop):
             self._first_loop = False
             self._last_state = state;
-            self._last_encoder_left = self.sensorA.count_high()
-            self._last_encoder_right = self.sensorB.count_high()
+            self._last_tick_left = self.sensorA.count_high()
+            self._last_tick_right = self.sensorB.count_high()
 
         # calc elapsed time
-        dt = state.header.stamp - self._last_state.header.stamp;
+        delta_time = (state.header.stamp - self._last_state.header.stamp).to_sec()
 
         # propigate odometry
         ## from theorical
-        x_dot = current_speed * math.cos(self._yaw)
-        y_dot = current_speed * math.sin(self._yaw)
-        delta_x  = x_dot * dt.to_sec()
-        delta_y  = y_dot * dt.to_sec()
-        delta_th = current_angular_velocity * dt.to_sec()
+        delta_distance = delta_time * current_speed
+        delta_x  = delta_distance * math.cos(self._yaw)
+        delta_y  = delta_distance * math.sin(self._yaw)
+        delta_th = delta_time * current_angular_velocity
 
-        rospy.loginfo("THEORICAL \tspeed:%f \tangle:%f \tangle_velocity:%f \tdelta X:%f Y:%f TH:%f",
-            current_speed,
-            current_steering_angle,
-            current_angular_velocity,
+        rospy.loginfo("THEORICAL \tdelta X:%f Y:%f TH:%f  \tspeed:%f \tangle:%f \tangle_velocity:%f ",
             delta_x,
             delta_y,
-            delta_th
+            delta_th,
+            current_speed,
+            state.drive.steering_angle,
+            current_angular_velocity
             )
 
         ## from wheel encoder
-        tick_a = self.sensorA.count_high()
-        tick_b = self.sensorB.count_high()
-        delta_tick_a = tick_a - self._last_encoder_left
-        delta_tick_b = tick_b - self._last_encoder_right
-        if (dt.to_sec() != 0):
-            v_left  = delta_tick_a * self.distance_pulse / dt.to_sec()
-            v_right = delta_tick_b * self.distance_pulse / dt.to_sec()
+        tick_left  = self.sensorA.count_high()
+        tick_right = self.sensorB.count_high()
+        delta_tick_left  = tick_left  - self._last_tick_left
+        delta_tick_right = tick_right - self._last_tick_right
+
+        if (delta_time > 0):
+            v_left  = delta_tick_left  * self.distance_pulse / delta_time
+            v_right = delta_tick_right * self.distance_pulse / delta_time
         else:
             v_left  = -1
             v_right = -1
-        delta_distance = 0.5 * float(delta_tick_a + delta_tick_b) * self.distance_pulse
-        if (current_speed < 0):
+
+        delta_distance = 0.5 * float(delta_tick_left + delta_tick_right) * self.distance_pulse
+        if (current_speed < 0):  # Orientation encoder base on speed cmd.
             delta_distance = -delta_distance
-        delta_x = delta_distance * math.cos(self._yaw)
-        delta_y = delta_distance * -math.sin(self._yaw)
-        delta_th = float(delta_tick_b - delta_tick_a) * self.distance_pulse / 0.109  # Track = distance between both wheels starting from the middle of rubber tread (26mm).
 
-        rospy.loginfo("DEBUG tick \tA:%f \tB:%f delta \tA:%f \tB:%f ",
-            tick_a,
-            tick_b,
-            delta_tick_a,
-            delta_tick_b
-            )
+        delta_th = float(delta_tick_right - delta_tick_left) * self.distance_pulse / 0.109  # Track = distance between both wheels starting from the middle of rubber tread (26mm).
+        delta_x = delta_distance * math.cos(delta_th)
+        delta_y = delta_distance * -math.sin(delta_th)
 
-        rospy.loginfo("WHEEL Speed \tA:%f \tB:%f \tdelta X:%f Y:%f TH:%f",
-            v_left,
-            v_right,
+        #rospy.loginfo("DEBUG tick \tA:%f \tB:%f delta \tA:%f \tB:%f ",
+        #    tick_left,
+        #    tick_right,
+        #    delta_tick_left,
+        #    delta_tick_right
+        #    )
+
+        rospy.loginfo("WHEEL     \tdelta X:%f Y:%f TH:%f  Speed \tA:%f \tB:%f ",
             delta_x,
             delta_y,
-            delta_th
+            delta_th,
+            v_left,
+            v_right
             )
 
         # Apply position
-        self._x += delta_x
-        self._y += delta_y
+        #self._x += delta_x
+        #self._y += delta_y
+        #self._yaw += delta_th
         self._yaw += delta_th
+        self._x += (math.cos(self._yaw) * delta_x - math.sin(self._yaw) * delta_y)
+        self._y += (math.sin(self._yaw) * delta_x + math.cos(self._yaw) * delta_y)
 
         rospy.loginfo("ODOM/TF \tX:%f \tY:%f \tyaw:%f \tduration:%f",
             self._x,
             self._y,
             self._yaw,
-            dt.to_sec()
+            delta_time
             )
 
         # save state for next time
         self._last_state = state;
-        self._last_encoder_left = tick_a
-        self._last_encoder_right = tick_b
+        self._last_tick_left = tick_left
+        self._last_tick_right = tick_right
 
         # Common
         self._current_time = rospy.Time.now()
@@ -170,8 +174,8 @@ class PicarToOdom(object):
         self._quaternon = Quaternion()
         self._quaternon.x = 0.0
         self._quaternon.y = 0.0
-        self._quaternon.z = math.sin(self._yaw/2.0)
-        self._quaternon.w = math.cos(self._yaw/2.0)
+        self._quaternon.z = math.sin(self._yaw * 0.5)
+        self._quaternon.w = math.cos(self._yaw * 0.5)
 
         # publish odometry message
         odom = Odometry()
