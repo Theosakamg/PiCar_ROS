@@ -82,19 +82,21 @@ class PicarToOdom(object):
 
 
     def state_callback(self, state):
-        # convert to engineering units
+
+        current_time = rospy.Time.now()
         current_speed = state.drive.speed
         current_angular_velocity = state.drive.steering_angle_velocity
 
         # use current state as last state if this is our first time here
         if (self._first_loop):
             self._first_loop = False
-            self._last_state = state;
+            self._last_time = current_time
+            self._last_state = state
             self._last_tick_left = self.sensorA.count_high()
             self._last_tick_right = self.sensorB.count_high()
 
         # calc elapsed time
-        delta_time = (state.header.stamp - self._last_state.header.stamp).to_sec()
+        delta_time = (current_time - self._last_time).to_sec()
 
         # propigate odometry
         ## from theorical
@@ -162,14 +164,14 @@ class PicarToOdom(object):
             self._yaw,
             delta_time
             )
-
+        
         # save state for next time
-        self._last_state = state;
+        self._last_time = current_time
+        self._last_state = state
         self._last_tick_left = tick_left
         self._last_tick_right = tick_right
 
         # Common
-        self._current_time = rospy.Time.now()
         #self._quaternon = tf_conversions.transformations.quaternion_from_euler(0, 0, self._yaw)
         self._quaternon = Quaternion()
         self._quaternon.x = 0.0
@@ -179,7 +181,7 @@ class PicarToOdom(object):
 
         # publish odometry message
         odom = Odometry()
-        odom.header.stamp = self._current_time
+        odom.header.stamp = current_time
         odom.header.frame_id = self._odom_frame
         odom.child_frame_id = self._base_frame
 
@@ -205,7 +207,7 @@ class PicarToOdom(object):
 
         if (self._publish_tf):
             tf = TransformStamped()
-            tf.header.stamp     = self._current_time
+            tf.header.stamp     = current_time
             tf.header.frame_id  = self._odom_frame
             tf.child_frame_id   = self._base_frame
             tf.transform.translation.x = self._x
