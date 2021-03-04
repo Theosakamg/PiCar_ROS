@@ -104,6 +104,7 @@ class PicarToOdom(object):
         delta_x  = delta_distance * math.cos(self._yaw)
         delta_y  = delta_distance * math.sin(self._yaw)
         delta_th = delta_time * current_angular_velocity
+        delta_th_apply = delta_th
 
         rospy.loginfo("THEORICAL \tdelta X:%f Y:%f TH:%f  \tspeed:%f \tangle:%f \tangle_velocity:%f ",
             delta_x,
@@ -154,7 +155,7 @@ class PicarToOdom(object):
         #self._x += delta_x
         #self._y += delta_y
         #self._yaw += delta_th
-        self._yaw += delta_th
+        self._yaw += delta_th_apply
         self._x += (math.cos(self._yaw) * delta_x - math.sin(self._yaw) * delta_y)
         self._y += (math.sin(self._yaw) * delta_x + math.cos(self._yaw) * delta_y)
 
