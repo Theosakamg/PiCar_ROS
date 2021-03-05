@@ -110,7 +110,7 @@ class PicarNode(object):
             steering_angle = self.msg.drive.steering_angle
             if(steering_angle > 0.1 or steering_angle < -0.1):
                 servo_angle = int(90 - 20 * steering_angle)
-                rospy.loginfo("steering : %f \servo : %f", steering_angle, servo_angle)
+                #rospy.loginfo("steering : %f \servo : %f", steering_angle, servo_angle)
                 self.servo.write(servo_angle)
             else:
                 self.servo.default()

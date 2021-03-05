@@ -37,31 +37,32 @@ class Twist2Ackermann(object):
         steering_angle = 0
         if not (omega == 0 or speed == 0):
             radius = speed / omega
+
             steering_angle = math.atan(self.wheelbase / radius)
 
         return steering_angle
 
     def cmd_callback(self, data):
-        rospy.logdebug("convert...")
-        steering_angle = self.convert_trans_rot_vel_to_steering_angle(data.linear.x,
-                                                                data.angular.z)
-        steering_angle_velocity = data.linear.x * math.tan(steering_angle) / self.wheelbase
+        steering_angle = self.convert_trans_rot_vel_to_steering_angle(data.linear.x, data.angular.z)
+        # steering_angle_velocity = ( data.linear.x / self.wheelbase ) * math.tan(steering_angle) # Same has angular
+        steering_angle_velocity = data.angular.z
 
         if TYPE_ACKERMANN == self.message_type:
             msg = AckermannDrive()
-            msg.steering_angle = steering_angle             # in rad
-            msg.speed = data.linear.x                       # in m/s
-            msg.acceleration = data.linear.x                # in m/s^2
+            msg.steering_angle = steering_angle     # in rad
+            msg.speed = data.linear.x               # in m/s
+            msg.acceleration = data.linear.x        # in m/s^2
 
         else:
             msg = AckermannDriveStamped()
             msg.header.stamp = rospy.Time.now()
             msg.header.frame_id = self.frame_id
-            msg.drive.steering_angle = steering_angle       # in rad
-            msg.drive.steering_angle_velocity = steering_angle_velocity    # in rad/s
-            msg.drive.speed = data.linear.x                 # in m/s
-            msg.drive.acceleration = data.linear.x          # in m/s^2
-            
+            msg.drive.steering_angle = steering_angle                   # in rad
+            msg.drive.steering_angle_velocity = steering_angle_velocity # in rad/s
+            msg.drive.speed = data.linear.x                             # in m/s
+            msg.drive.acceleration = data.linear.x                      # in m/s^2
+
+        rospy.logdebug("convert: \tv:%f  \ta:%f  \t:vel:%f", msg.drive.speed, msg.drive.steering_angle, msg.drive.steering_angle_velocity)
         self.pub.publish(msg)
 
 
