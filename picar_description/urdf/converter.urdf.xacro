@@ -13,6 +13,7 @@
   <xacro:property name="wheel_rear_width" value="$(arg wheel_rear_width)"/>
   <xacro:property name="wheel_rear_radius" value="$(arg wheel_rear_radius)"/>
 
+  <xacro:property name="steer_front_mass" value="$(arg steer_front_mass)"/>
   <xacro:property name="wheel_front_mass" value="$(arg wheel_front_mass)"/>
   <xacro:property name="wheel_front_width" value="$(arg wheel_front_width)"/>
   <xacro:property name="wheel_front_radius" value="$(arg wheel_front_radius)"/>

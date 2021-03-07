@@ -19,7 +19,7 @@ teleop:
       -
         axis: 0
         target: angular.z
-        scale: 1.15       # Maximum angle steering 0.58 rad
+        scale: 0.61       # Maximum angle steering 0.58 rad
         offset: 0.00
 
   cam_motor:
