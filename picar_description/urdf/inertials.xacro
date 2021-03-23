@@ -24,10 +24,6 @@
                 iyy="${mass * (x * x + z * z) / 12.0}" iyz="0.0"
                 izz="${mass * (x * x + y * y) / 12.0}">
             </inertia>
-            <!-- <inertia
-                ixx="${body_mass / 12.0 * (body_height*body_height + body_length*body_length)}" ixy="0.0" ixz="0.0"
-                iyy="${body_mass / 12.0 * (body_width*body_width + body_length*body_length)}" iyz="0.0"
-                izz="${body_mass / 12.0 * (body_width*body_width + body_height*body_height)}"/> -->
         </inertial>
     </xacro:macro>
 
@@ -47,7 +43,7 @@
     <xacro:macro name="null_inertial">
         <inertial>
             <mass value="0.001"/>
-            <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+            <inertia ixx="9.049479166666668e-06" ixy="0" ixz="0" iyy="9.049479166666668e-06" iyz="0" izz="9.765625000000002e-06"/>
         </inertial>
     </xacro:macro>
 </robot>

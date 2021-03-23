@@ -1,38 +1,38 @@
 <launch>
 
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
-  <arg name="paused" default="false"/>
-  <arg name="use_sim_time" default="true"/>
-  <arg name="gui" default="true"/>
-  <arg name="headless" default="false"/>
-  <arg name="debug" default="false"/>
-  <arg name="namespace" default="/picar" />
+  <arg name="paused"          default="false"/>
+  <arg name="use_sim_time"    default="true"/>
+  <arg name="gui"             default="true"/>
+  <arg name="headless"        default="false"/>
+  <arg name="debug"           default="false"/>
+  <arg name="namespace"       default="/picar" />
 
-  <arg name="world_name" default="worlds/empty_world" />
-  <arg name="model" default="$(find picar_description)/urdf/picar.urdf.xacro"/>
-  <arg name="rvizconfig" default="$(find picar_description)/rviz/simu.rviz" />
+  <arg name="world_name"      default="worlds/empty_world" />
+  <arg name="model"           default="$(find picar_description)/urdf/picar.urdf.xacro"/>
+  <arg name="rvizconfig"      default="$(find picar_description)/rviz/simu.rviz" />
 
   <group ns="$(arg namespace)">
 
     <!-- Gazebo  -->
     <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-      <arg name="debug" value="$(arg debug)" />
-      <arg name="gui" value="$(arg gui)" />
-      <arg name="paused" value="$(arg paused)"/>
-      <arg name="use_sim_time" value="$(arg use_sim_time)"/>
-      <arg name="headless" value="$(arg headless)"/>
-      <arg name="world_name" default="$(arg world_name)"/>
+      <arg name="debug"         value="$(arg debug)" />
+      <arg name="gui"           value="$(arg gui)" />
+      <arg name="paused"        value="$(arg paused)"/>
+      <arg name="use_sim_time"  value="$(arg use_sim_time)"/>
+      <arg name="headless"      value="$(arg headless)"/>
+      <arg name="world_name"    value="$(arg world_name)"/>
     </include>
 
     <!-- Load the robot description -->
     <param name="robot_description"  command="$(find xacro)/xacro $(arg model)" />
 
     <!-- Load ros_controllers configuration parameters -->
-    <rosparam file="$(find picar_control)/config/ctrl_ackermann_steering_controller.yaml" command="load" ns="$(arg namespace)" />
-    <rosparam file="$(find picar_control)/config/ctrl_gains.yaml" command="load" ns="$(arg namespace)" />
-    <rosparam file="$(find picar_control)/config/ctrl_joint_state_publisher.yaml" command="load" ns="$(arg namespace)" />
-    <rosparam file="$(find picar_control)/config/ctrl_steer_bot_hardware_gazebo.yaml" command="load" ns="$(arg namespace)" />
+    <rosparam command="load" ns="$(arg namespace)" file="$(find picar_control)/config/ackermann_steering_controller.yaml" />
+    <rosparam command="load" ns="$(arg namespace)" file="$(find picar_control)/config/gains.yaml" />
+    <rosparam command="load" ns="$(arg namespace)" file="$(find picar_control)/config/joint_state_publisher.yaml" />
+    <rosparam command="load" ns="$(arg namespace)" file="$(find picar_control)/config/steer_bot_hardware_gazebo.yaml" />
 
     <!-- Spawn the controllers -->
     <node pkg="controller_manager" type="spawner" name="controller_spawner" ns="$(arg namespace)"
@@ -44,16 +44,11 @@
       <param name="publish_frequency" type="double" value="50.0" />
     </node>
 
-    <!-- Publish joint states -->
-    <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-      <param name="use_gui" value="$(arg gui)" />
-    </node-->
-
     <!-- push robot_description to factory and spawn robot in gazebo -->
     <node pkg="gazebo_ros" type="spawn_model" name="spawn_vehicle" 
           args="-urdf -param robot_description -model picar
                 -gazebo_namespace /$(arg namespace)/gazebo
-                -x 0.0 -y 0.0 -z 0.0
+                -x 0.0 -y 0.0 -z 0.01
                 -R 0.0 -P 0.0 -Y 0.0"
           respawn="false"
           output="screen" />
@@ -65,6 +60,7 @@
     </node>
 
     <node name="rviz" pkg="rviz" type="rviz"  args="-d $(arg rvizconfig)" />
+    <node name="rqt"  pkg="rqt_gui" type="rqt_gui" />
 
   </group>
 </launch>
