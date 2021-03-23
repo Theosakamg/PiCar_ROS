@@ -7,7 +7,8 @@
   <xacro:property name="body_height" value="$(arg body_height)"/>
   <xacro:property name="body_offset" value="$(arg body_offset)"/>
 
-  <xacro:property name="wheelbase" value="$(arg wheelbase)"/>
+  <xacro:property name="wheelbase_h" value="$(arg wheelbase_h)"/>
+  <xacro:property name="wheelbase_w" value="$(arg wheelbase_w)"/>
 
   <xacro:property name="steer_rear_axe" value="$(arg steer_rear_axe)"/>
   <xacro:property name="wheel_rear_mass" value="$(arg wheel_rear_mass)"/>

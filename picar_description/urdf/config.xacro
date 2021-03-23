@@ -7,7 +7,8 @@
   <xacro:arg name="body_height"   default="0.029"/>
   <xacro:arg name="body_offset"   default="0.070"/>
 
-  <xacro:arg name="wheelbase"     default="0.140"/>
+  <xacro:arg name="wheelbase_h"     default="0.096"/>
+  <xacro:arg name="wheelbase_w"     default="0.140"/>
 
   <!-- Rear wheel -->
   <xacro:arg name="steer_rear_axe"     default="0.055"/>
@@ -17,7 +18,7 @@
 
   <!-- Front wheel -->
   <xacro:arg name="steer_front_mass"    default="0.031"/>
-  <xacro:arg name="steer_front_axe"     default="0.048"/>
+  <xacro:arg name="steer_front_axe"     default="0.048"/><!-- ${wheelbase_h/2} -->
   <xacro:arg name="wheel_front_mass"    default="0.023"/>
   <xacro:arg name="wheel_front_width"   default="0.026"/>
   <xacro:arg name="wheel_front_radius"  default="0.0335"/>

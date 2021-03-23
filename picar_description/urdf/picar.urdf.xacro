@@ -38,7 +38,7 @@
       </geometry>
     </collision>
     <xacro:solid_cuboid_inertial
-        xyz="0.0 0.0 ${body_height/2}"
+        xyz="0.07 0.0 ${-body_height/2}"
         rpy="0.0 0.0 0.0"
         mass="${body_mass}"
         x="${body_length}"
@@ -54,12 +54,13 @@
 
 
   <link name="front_steer_link">
-    <xacro:solid_cylinder_inertial
+    <xacro:null_inertial />
+    <!--xacro:solid_cylinder_inertial
       xyz="0.0 0.0 0.0"
       rpy="0.0 0.0 0.0"
-      mass="0.03125"
+      mass="0.00125"
       radius="0.01"
-      length="0.01"/>
+      length="0.01"/-->
     <!--inertia ixx="0.0006583333333333334" ixy="0.0" ixz="0.0" iyy="0.0006583333333333334" iyz="0.0" izz="0.0012500000000000002"/-->
   </link>
   <joint name="front_steer_joint" type="revolute">
@@ -135,7 +136,7 @@
   <joint name="front_right_steer_joint" type="revolute">
     <parent link="base_link"/>
     <child link="front_right_steer_link"/>
-    <origin rpy="0.0 0.0 0.0" xyz="${wheelbase} ${steer_front_axe} 0.0"/>
+    <origin rpy="0.0 0.0 0.0" xyz="${wheelbase_w} ${steer_front_axe} 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="10.0" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="5.0"/>
   </joint>
@@ -145,7 +146,6 @@
       <geometry>
         <mesh filename="package://picar_description/meshes/WheelFrontRight.dae" />
       </geometry>
-      <!--material name="red"/-->
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -210,7 +210,7 @@
   <joint name="front_left_steer_joint" type="revolute">
     <parent link="base_link"/>
     <child link="front_left_steer_link"/>
-    <origin rpy="0.0 0.0 ${pi}" xyz="${wheelbase} ${-steer_front_axe} 0.0"/>
+    <origin rpy="0.0 0.0 ${pi}" xyz="${wheelbase_w} ${-steer_front_axe} 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="10.0" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="5.0"/>
   </joint>
@@ -220,7 +220,6 @@
       <geometry>
         <mesh filename="package://picar_description/meshes/WheelFrontRight.dae" />
       </geometry>
-      <!--material name="red"/-->
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -279,7 +278,6 @@
       <geometry>
         <mesh filename="package://picar_description/meshes/WheelRearRight.dae" />
       </geometry>
-      <!--material name="red"/-->
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -323,7 +321,6 @@
       <geometry>
         <mesh filename="package://picar_description/meshes/WheelRearLeft.dae" />
       </geometry>
-      <!--material name="red"/-->
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
