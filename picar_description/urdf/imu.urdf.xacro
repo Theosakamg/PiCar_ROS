@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+
+<robot name="imu" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find picar_description)/urdf/inertials.xacro" />
+
+  <xacro:property name="imu_size_x" value="0.03"/>
+  <xacro:property name="imu_size_y" value="0.03"/>
+  <xacro:property name="imu_size_z" value="0.04"/>
+  <xacro:property name="imu_origin_x" value="0.065"/>
+  <xacro:property name="imu_origin_y" value="0"/>
+  <xacro:property name="imu_origin_z" value="0.035"/>
+
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${imu_size_x} ${imu_size_y} ${imu_size_z}"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${imu_size_x} ${imu_size_y} ${imu_size_z}"/>
+      </geometry>
+    </collision>
+    <xacro:solid_cuboid_inertial
+        xyz="0.0 0.0 0.0"
+        rpy="0.0 0.0 0.0"
+        mass="0.2"
+        x="0.01"
+        y="0.01"
+        z="0.01" />
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="${imu_origin_x} ${imu_origin_y} ${imu_origin_z}" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+  </joint>
+
+  <gazebo reference="imu_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <topicName>imu</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+</robot>

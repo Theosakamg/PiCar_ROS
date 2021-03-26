@@ -8,7 +8,7 @@
 
   <arg name="joy_topic" default="joy" />
   <arg name="joy_vel_topic" default="joy_vel" />
-  <arg name="cmd_vel_topic" default="/picar/ackermann_steering_controller/cmd_vel" />
+  <arg name="cmd_vel_topic" default="/cmd_vel" />
 
   <rosparam file="$(arg teleop_config_filepath)" command="load" />
 
