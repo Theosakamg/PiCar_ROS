@@ -1,78 +1,153 @@
 <?xml version="1.0" ?>
 
-<robot name="openni" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sensor_xtion_pro" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:include filename="$(find picar_description)/urdf/inertials.xacro" />
 
-  <xacro:property name="camera_size_x" value="0.03"/>
-  <xacro:property name="camera_size_y" value="0.03"/>
-  <xacro:property name="camera_size_z" value="0.04"/>
-  <xacro:property name="camera_origin_x" value="0.065"/>
-  <xacro:property name="camera_origin_y" value="0"/>
-  <xacro:property name="camera_origin_z" value="0.035"/>
+  <!-- Xacro properties -->
+  <xacro:property name="camera_origin_x" value="0.19825"/>
+  <xacro:property name="camera_origin_y" value="0.0"/>
+  <xacro:property name="camera_origin_z" value="${0.113-(0.027+0.002)}"/>
 
-  <xacro:property name="link_name" value="camera_link"/>
-  <xacro:property name="camera_name" value="camera0"/>
-  <xacro:property name="frame_name" value="camera_link"/>
+  <xacro:property name="asus_xtion_pro_depth_rel_rgb_py" value="0.0270" />
+  <xacro:property name="asus_xtion_pro_cam_rel_rgb_py"   value="-0.0220" />
 
-  <!-- Camera -->
-  <link name="${link_name}">
+  <xacro:property name="M_SCALE" value="0.001"/>
+
+  <joint name="camera_rgb_joint" type="fixed">
+    <origin xyz="${camera_origin_x} ${camera_origin_y} ${camera_origin_z}"
+            rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="camera_rgb_frame" />
+  </joint>
+  <link name="camera_rgb_frame">
+    <inertial>
+      <mass value="0.001" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+        iyy="0.0001" iyz="0.0"
+        izz="0.0001" />
+    </inertial>
+  </link>
+
+  <joint name="camera_rgb_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    <parent link="camera_rgb_frame" />
+    <child link="camera_rgb_optical_frame" />
+  </joint>
+  <link name="camera_rgb_optical_frame">
+    <inertial>
+      <mass value="0.001" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+        iyy="0.0001" iyz="0.0"
+        izz="0.0001" />
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <origin xyz="0 ${asus_xtion_pro_cam_rel_rgb_py} 0"
+            rpy="0 0 0"/>
+    <parent link="camera_rgb_frame"/>
+    <child link="camera_link"/>
+  </joint>
+  <link name="camera_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="-0.01 0.0 0.0" rpy="${-pi/2} ${-pi} ${-pi/2}"/>
       <geometry>
-        <box size="${camera_size_x} ${camera_size_y} ${camera_size_z}"/>
+        <mesh filename="package://picar_description/meshes/sensors/asus_xtion_pro_live.dae" scale="${M_SCALE} ${M_SCALE} ${M_SCALE}"/>
       </geometry>
-      <material name="red"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
       <geometry>
-        <box size="${camera_size_x} ${camera_size_y} ${camera_size_z}"/>
-      </geometry>
+      <box size="0.0730 0.2760 0.0720"/>
+    </geometry>
     </collision>
-    <xacro:solid_cuboid_inertial
-        xyz="0.0 0.0 0.0"
-        rpy="0.0 0.0 0.0"
-        mass="0.2"
-        x="0.01"
-        y="0.01"
-        z="0.01" />
+    <inertial>
+      <mass value="0.170" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001152600" ixy="0.0" ixz="0.0"
+                iyy="0.000148934" iyz="0.0"
+                izz="0.001154654" />
+    </inertial>
   </link>
-  <joint name="camera_joint" type="fixed">
-    <axis xyz="0 1 0" />
-    <origin xyz="${camera_origin_x} ${camera_origin_y} ${camera_origin_z}" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="${link_name}"/>
+
+  <joint name="camera_depth_joint" type="fixed">
+    <origin xyz="0 ${asus_xtion_pro_depth_rel_rgb_py} 0" rpy="0 0 0" />
+    <parent link="camera_rgb_frame" />
+    <child link="camera_depth_frame" />
+  </joint>
+  <link name="camera_depth_frame">
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+        iyy="0.001" iyz="0.0"
+        izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="camera_depth_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    <parent link="camera_depth_frame" />
+    <child link="camera_depth_optical_frame" />
+  </joint>
+  <link name="camera_depth_optical_frame">
+    <inertial>
+      <mass value="0.001" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+        iyy="0.0001" iyz="0.0"
+        izz="0.0001" />
+    </inertial>
+  </link>
+
+
+  <!-- generate an optical frame 
+  http://www.ros.org/reps/rep-0103.html#suffix-frames
+  so that ros and opencv can operate on the camera frame correctly 
+  -->
+  <joint name="camera_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="camera_link"/>
+    <child link="camera_link_optical"/>
   </joint>
 
-  <!-- camera -->
-  <gazebo reference="${link_name}">
-    <sensor name="${link_name}_camera" type="depth">
+  <link name="camera_link_optical" />
+
+    <!-- RGBD sensor for simulation, same as Kinect -->
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="depth">
+      <always_on>true</always_on>
       <update_rate>20</update_rate>
       <camera>
-        <horizontal_fov>1.047198</horizontal_fov>
+        <horizontal_fov>${60.0*pi/180.0}</horizontal_fov>
         <image>
           <width>640</width>
           <height>480</height>
-          <format>R8G8B8</format>
+          <format>B8G8R8</format>
         </image>
         <clip>
           <near>0.05</near>
-          <far>3</far>
+          <far>8.0</far>
         </clip>
       </camera>
-      <plugin name="${link_name}_controller" filename="libgazebo_ros_openni_kinect.so">
-        <baseline>0.2</baseline>
+      <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
+        <baseline>0.1</baseline>
         <alwaysOn>true</alwaysOn>
-        <updateRate>1.0</updateRate>
-        <cameraName>${camera_name}_ir</cameraName>
-        <imageTopicName>color/image_raw</imageTopicName>
-        <cameraInfoTopicName>color/camera_info</cameraInfoTopicName>
+        <updateRate>10.0</updateRate>
+        <cameraName>camera_ir</cameraName>
+        <imageTopicName>rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
         <depthImageTopicName>depth/image_raw</depthImageTopicName>
         <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
         <pointCloudTopicName>depth/points</pointCloudTopicName>
-        <frameName>${frame_name}</frameName>
-        <pointCloudCutoff>0.5</pointCloudCutoff>
+        <frameName>/camera_link_optical</frameName><!--camera_depth_optical_frame-->
+        <pointCloudCutoff>0.4</pointCloudCutoff>
         <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
         <distortionK1>0.00000001</distortionK1>
         <distortionK2>0.00000001</distortionK2>
@@ -87,43 +162,5 @@
       </plugin>
     </sensor>
   </gazebo>
-
-  <!--gazebo reference="camera_link">
-    <sensor type="camera" name="camera0">
-      <update_rate>30.0</update_rate>
-      <camera name="head">
-        <horizontal_fov>1.3962634</horizontal_fov>
-        <image>
-          <width>800</width>
-          <height>800</height>
-          <format>R8G8B8</format>
-        </image>
-        <clip>
-          <near>0.02</near>
-          <far>300</far>
-        </clip>
-        <noise>
-          <type>gaussian</type>
-
-          <mean>0.0</mean>
-          <stddev>0.007</stddev>
-        </noise>
-      </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
-        <cameraName>camera0</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>camera_link</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
-    </sensor>
-  </gazebo-->
 
 </robot>

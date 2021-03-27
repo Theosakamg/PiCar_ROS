@@ -27,15 +27,7 @@
   </gazebo>
 
   <!-- Start BaseFootprint -->
-  <!--link name="base_footprint">
-    <inertial>
-      <mass value="0.0001"/>
-      <origin xyz="0 0 0"/>
-      <inertia
-        ixx="0.0001" ixy="0.0" ixz="0.0"
-        iyy="0.0001" iyz="0.0"
-        izz="0.0001"/>
-    </inertial>
+  <link name="base_footprint">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -43,14 +35,11 @@
       </geometry>
     </visual>
   </link>
-  <gazebo reference="base_footprint">
-    <turnGravityOff>false</turnGravityOff>
-  </gazebo>
   <joint name="base_footprint_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.04"/>
     <parent link="base_footprint"/>
     <child link="base_link"/>
-  </joint-->
+  </joint>
 
   <!-- Start Baselink -->
   <link name="base_link">
