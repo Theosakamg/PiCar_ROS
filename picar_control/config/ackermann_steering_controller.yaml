@@ -20,7 +20,7 @@ ackermann_steering_controller:
 
     # Transform from odom -> base_link
     enable_odom_tf: true
-    odom_frame_id: '/odom'
+    odom_frame_id: 'odom'
 
     # 3.1.7
     # Odometry calibration and tuning
