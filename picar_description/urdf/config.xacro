@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<robot name="config" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="body_mass"     default="1.000"/>
+  <xacro:arg name="body_width"    default="0.078"/>
+  <xacro:arg name="body_length"   default="0.210"/>
+  <xacro:arg name="body_height"   default="0.029"/>
+  <xacro:arg name="body_offset"   default="0.070"/>
+
+  <xacro:arg name="wheelbase_h"     default="0.096"/>
+  <xacro:arg name="wheelbase_w"     default="0.140"/>
+
+  <!-- Rear wheel -->
+  <xacro:arg name="steer_rear_axe"     default="0.055"/>
+  <xacro:arg name="wheel_rear_mass"    default="0.025"/>
+  <xacro:arg name="wheel_rear_width"   default="0.0255"/>
+  <xacro:arg name="wheel_rear_radius"  default="0.0335"/>
+
+  <!-- Front wheel -->
+  <xacro:arg name="steer_front_mass"    default="0.031"/>
+  <xacro:arg name="steer_front_axe"     default="0.048"/><!-- ${wheelbase_h/2} -->
+  <xacro:arg name="wheel_front_mass"    default="0.023"/>
+  <xacro:arg name="wheel_front_width"   default="0.026"/>
+  <xacro:arg name="wheel_front_radius"  default="0.0335"/>
+
+  <xacro:arg name="ground_clearance" default="0.2"/>
+
+  <xacro:include filename="$(find picar_description)/urdf/converter.urdf.xacro"/>
+
+</robot>

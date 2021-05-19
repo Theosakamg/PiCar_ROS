@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot name="picar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="converter" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:property name="body_mass" value="$(arg body_mass)"/>
   <xacro:property name="body_width" value="$(arg body_width)"/>
@@ -7,12 +7,16 @@
   <xacro:property name="body_height" value="$(arg body_height)"/>
   <xacro:property name="body_offset" value="$(arg body_offset)"/>
 
-  <xacro:property name="wheelbase" value="$(arg wheelbase)"/>
+  <xacro:property name="wheelbase_h" value="$(arg wheelbase_h)"/>
+  <xacro:property name="wheelbase_w" value="$(arg wheelbase_w)"/>
 
+  <xacro:property name="steer_rear_axe" value="$(arg steer_rear_axe)"/>
   <xacro:property name="wheel_rear_mass" value="$(arg wheel_rear_mass)"/>
   <xacro:property name="wheel_rear_width" value="$(arg wheel_rear_width)"/>
   <xacro:property name="wheel_rear_radius" value="$(arg wheel_rear_radius)"/>
 
+  <xacro:property name="steer_front_mass" value="$(arg steer_front_mass)"/>
+  <xacro:property name="steer_front_axe"  value="$(arg steer_front_axe)"/>
   <xacro:property name="wheel_front_mass" value="$(arg wheel_front_mass)"/>
   <xacro:property name="wheel_front_width" value="$(arg wheel_front_width)"/>
   <xacro:property name="wheel_front_radius" value="$(arg wheel_front_radius)"/>

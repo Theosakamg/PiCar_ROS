@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+
+<robot name="lidar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find picar_description)/urdf/inertials.xacro" />
+
+  <xacro:property name="laser_size_radius" value="0.038"/>
+  <xacro:property name="laser_size_length" value="0.025"/>
+  <xacro:property name="laser_origin_x" value="0.0"/>
+  <xacro:property name="laser_origin_y" value="0.0"/>
+  <xacro:property name="laser_origin_z" value="0.120"/>
+
+  <!-- LIDAR -->
+  <link name="sensor_laser">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${laser_size_length}" radius="${laser_size_radius}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${laser_size_length}" radius="${laser_size_radius}"/>
+      </geometry>
+    </collision>
+    <xacro:solid_cylinder_inertial
+        xyz="0.0 0.0 0.0"
+        rpy="0.0 0.0 0.0"
+        mass="0.2"
+        length="${laser_size_length}"
+        radius="${laser_size_radius}"/>
+  </link>
+  <joint name="sensor_laser_joint" type="fixed">
+    <origin xyz="${laser_origin_x} ${laser_origin_y} ${laser_origin_z}" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="sensor_laser" />
+  </joint>
+
+  <!--Gazebo Laser Plugin-->
+  <gazebo reference="sensor_laser">
+    <material>Gazebo/Black</material>
+    <sensor type="ray" name="lidar">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>500</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159265359</min_angle>
+            <max_angle>3.14159265359</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.15</min>
+          <max>12.0</max>
+          <resolution>0.5</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_lidar" filename="libgazebo_ros_laser.so">
+        <topicName>laser/scan</topicName>
+        <frameName>/sensor_laser</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+</robot>

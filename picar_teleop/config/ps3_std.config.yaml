@@ -14,12 +14,12 @@ teleop:
       -
         axis: 1
         target: linear.x
-        scale: 0.28       # Maximum speed in m/s
+        scale: 0.31       # Maximum speed in m/s
         offset: 0.00
       -
         axis: 0
         target: angular.z
-        scale: 1.15       # Maximum angle steering 0.58 rad
+        scale: 0.61       # Maximum angle steering 0.58 rad
         offset: 0.00
 
   cam_motor:
