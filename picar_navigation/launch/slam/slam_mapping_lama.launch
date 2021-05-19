@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="frame_base"      default="base_footprint"/>
+  <arg name="frame_odom"      default="odom"/>
+  <arg name="frame_map"       default="map" />
+  <arg name="scan_topic"      default="laser/scan"/>
+
+  <node pkg="iris_lama_ros" type="slam2d_ros" name="slam_lama" output="screen">
+    <param name="global_frame_id" value="$(arg frame_map)"/>
+    <param name="odom_frame_id"   value="$(arg frame_odom)"/>
+    <param name="base_frame_id"   value="$(arg frame_base)"/>
+    <param name="scan_topic"      value="$(arg scan_topic)"/>
+
+    <remap from="map" to="/map" />
+    <remap from="map_metadata" to="/map_metadata" />
+  </node>
+
+</launch>

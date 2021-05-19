@@ -129,10 +129,11 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME}
-  src/PicarHardwareInterface.cpp
-  src/PicarHardwareInterfaceNode.cpp
-)
+
+# add_library(${PROJECT_NAME}
+#   src/PicarHardwareInterface.cpp
+#   src/PicarHardwareInterfaceNode.cpp
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -155,9 +156,9 @@ add_library(${PROJECT_NAME}
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(${PROJECT_NAME}
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -181,18 +182,20 @@ target_link_libraries(${PROJECT_NAME}
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-)
+
+# install(TARGETS ${PROJECT_NAME}
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+# )
 
 ## Mark cpp header files for installation ${PROJECT_NAME}/
-install(DIRECTORY include/
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.hpp"
-#   PATTERN ".svn" EXCLUDE
-)
+
+# install(DIRECTORY include/
+#   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.hpp"
+# #   PATTERN ".svn" EXCLUDE
+# )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES

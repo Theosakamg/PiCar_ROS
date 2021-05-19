@@ -44,11 +44,11 @@
     <sensor type="ray" name="lidar">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
-      <update_rate>5</update_rate>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
-            <samples>500</samples>
+            <samples>8000</samples>
             <resolution>1</resolution>
             <min_angle>-3.14159265359</min_angle>
             <max_angle>3.14159265359</max_angle>

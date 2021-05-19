@@ -11,7 +11,7 @@
   <xacro:include filename="$(find picar_description)/urdf/inertials.xacro" />
   <xacro:include filename="$(find picar_description)/urdf/lidar.urdf.xacro" />
   <xacro:include filename="$(find picar_description)/urdf/openni.urdf.xacro" />
-  <xacro:include filename="$(find picar_description)/urdf/imu.urdf.xacro" />
+  <!--xacro:include filename="$(find picar_description)/urdf/imu.urdf.xacro" /-->
 
   <xacro:property name="robot_namespace" value="/picar"/>
 
@@ -56,7 +56,7 @@
       </geometry>
     </collision>
     <xacro:solid_cuboid_inertial
-        xyz="0.07 0.0 ${-body_height/2}"
+        xyz="0.07 0.0 0.0"
         rpy="0.0 0.0 0.0"
         mass="${body_mass}"
         x="${body_length}"

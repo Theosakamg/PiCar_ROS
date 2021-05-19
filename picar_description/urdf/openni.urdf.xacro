@@ -21,13 +21,13 @@
     <child link="camera_rgb_frame" />
   </joint>
   <link name="camera_rgb_frame">
-    <inertial>
+    <!--inertial>
       <mass value="0.001" />
-      <origin xyz="0 0 0" />
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-        iyy="0.0001" iyz="0.0"
-        izz="0.0001" />
-    </inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia  ixx="0.0001" ixy="0.0" ixz="0.0"
+                iyy="0.0001" iyz="0.0"
+                izz="0.0001" />
+    </inertial-->
   </link>
 
   <joint name="camera_rgb_optical_joint" type="fixed">
@@ -36,13 +36,13 @@
     <child link="camera_rgb_optical_frame" />
   </joint>
   <link name="camera_rgb_optical_frame">
-    <inertial>
+    <!--inertial>
       <mass value="0.001" />
-      <origin xyz="0 0 0" />
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-        iyy="0.0001" iyz="0.0"
-        izz="0.0001" />
-    </inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia  ixx="0.0001" ixy="0.0" ixz="0.0"
+                iyy="0.0001" iyz="0.0"
+                izz="0.0001" />
+    </inertial-->
   </link>
 
   <joint name="camera_joint" type="fixed">
@@ -64,13 +64,20 @@
         <mesh filename="package://picar_description/meshes/sensors/asus_xtion_pro_live.dae" scale="${M_SCALE} ${M_SCALE} ${M_SCALE}"/>
       </geometry>
     </collision>
-    <inertial>
+    <xacro:solid_cuboid_inertial
+        xyz="0.0 0.0 0.0"
+        rpy="${-pi/2} ${-pi} ${-pi/2}"
+        mass="0.170"
+        x="0.18"
+        y="0.035"
+        z="0.025" />
+    <!--inertial>
       <mass value="0.170" />
-      <origin xyz="0 0 0" />
-      <inertia ixx="0.001152600" ixy="0.0" ixz="0.0"
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia  ixx="0.001152600" ixy="0.0" ixz="0.0"
                 iyy="0.000148934" iyz="0.0"
                 izz="0.001154654" />
-    </inertial>
+    </inertial-->
   </link>
 
   <joint name="camera_depth_joint" type="fixed">
@@ -79,13 +86,13 @@
     <child link="camera_depth_frame" />
   </joint>
   <link name="camera_depth_frame">
-    <inertial>
+    <!--inertial>
       <mass value="0.01" />
-      <origin xyz="0 0 0" />
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-        iyy="0.001" iyz="0.0"
-        izz="0.001" />
-    </inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia  ixx="0.001" ixy="0.0" ixz="0.0"
+                iyy="0.001" iyz="0.0"
+                izz="0.001" />
+    </inertial-->
   </link>
 
   <joint name="camera_depth_optical_joint" type="fixed">
@@ -94,13 +101,13 @@
     <child link="camera_depth_optical_frame" />
   </joint>
   <link name="camera_depth_optical_frame">
-    <inertial>
+    <!--inertial>
       <mass value="0.001" />
-      <origin xyz="0 0 0" />
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-        iyy="0.0001" iyz="0.0"
-        izz="0.0001" />
-    </inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia  ixx="0.0001" ixy="0.0" ixz="0.0"
+                iyy="0.0001" iyz="0.0"
+                izz="0.0001" />
+    </inertial-->
   </link>
 
 
