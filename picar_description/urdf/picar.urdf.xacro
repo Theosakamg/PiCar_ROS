@@ -1,283 +1,378 @@
 <?xml version="1.0" ?>
+<!--
+  Robot model adapted from :
+  - https://github.com/CIR-KIT/steer_drive_ros/blob/kinetic-devel/steer_drive_controller/test/common/urdf/steerbot.xacro
+  - https://github.com/srmainwaring/steer_bot/blob/master/steer_bot_description/urdf/steer_bot.urdf.xacro
+-->
 <robot name="picar" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find picar_description)/urdf/config.urdf.xacro"/>
-  <xacro:include filename="$(find picar_description)/urdf/materials.urdf.xacro"/>
+  <xacro:include filename="$(find picar_description)/urdf/config.xacro" />
+  <xacro:include filename="$(find picar_description)/urdf/materials.xacro" />
+  <xacro:include filename="$(find picar_description)/urdf/inertials.xacro" />
+  <xacro:include filename="$(find picar_description)/urdf/lidar.urdf.xacro" />
+  <xacro:include filename="$(find picar_description)/urdf/openni.urdf.xacro" />
+  <!--xacro:include filename="$(find picar_description)/urdf/imu.urdf.xacro" /-->
 
+  <xacro:property name="robot_namespace" value="/picar"/>
+
+  <!-- Gazebo plugins -->
   <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/picar</robotNamespace>
-      <!-- <robotSimType>steer_bot_hardware_gazebo/SteerBotHardwareGazebo</robotSimType> Not maintening -->
-      <!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
+    <!-- Load ros_control plugin using the steer_bot_hardware_gazebo
+    implementation of the hardware_interface::RobotHW -->
+    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <robotNamespace>${robot_namespace}</robotNamespace>
+      <robotSimType>steer_bot_hardware_gazebo/SteerBotHardwareGazebo</robotSimType>
+      <legacyModeNS>false</legacyModeNS>
     </plugin>
   </gazebo>
 
-  <link name="world"/>
-
-  <joint name="fixed" type="fixed">
-    <parent link="world"/>
+  <!-- Start BaseFootprint -->
+  <link name="base_footprint">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="base_footprint_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.04"/>
+    <parent link="base_footprint"/>
     <child link="base_link"/>
   </joint>
 
   <!-- Start Baselink -->
-  <link name="base_link" >
-    <gazebo>
-      <material>Gazebo/Orange</material>
-    </gazebo>
-  </link>
-
-  <link name="body">
+  <link name="base_link">
     <visual>
       <origin xyz="0.0 0.0 ${-body_height/2}"/>
-      <!-- ${body_offset} -->
       <geometry>
-        <!-- <box size="${body_length} ${body_width} ${body_height}"/> -->
         <mesh filename="package://picar_description/meshes/Chassis.dae" />
       </geometry>
-      <material name="body"/>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 ${-body_height/2}"/>
+      <origin xyz="0.0 0.0 ${-body_height/2}" rpy="0.0 0.0 0.0" />
       <geometry>
         <mesh filename="package://picar_description/meshes/Chassis.dae" />
       </geometry>
     </collision>
-     <inertial>
-      <origin xyz="0 0 ${body_height/2}" rpy="0 0 0"/>
-      <mass value="${body_mass}"/>
-      <inertia
-        ixx="${body_mass / 12.0 * (body_height*body_height + body_length*body_length)}" ixy="0.0" ixz="0.0"
-        iyy="${body_mass / 12.0 * (body_width*body_width + body_length*body_length)}" iyz="0.0"
-        izz="${body_mass / 12.0 * (body_width*body_width + body_height*body_height)}"/>
-    </inertial>
+    <xacro:solid_cuboid_inertial
+        xyz="0.07 0.0 0.0"
+        rpy="0.0 0.0 0.0"
+        mass="${body_mass}"
+        x="${body_length}"
+        y="${body_width}"
+        z="${body_height}" />
   </link>
-  <joint name="base_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="body"/>
-  </joint>
+  <gazebo reference="base_link">
+    <material>Gazebo/Green</material>
+  </gazebo>
   <!-- End Baselink -->
 
+
+
+
+  <link name="front_steer_link">
+    <xacro:null_inertial />
+    <!--xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="0.00125"
+      radius="0.01"
+      length="0.01"/-->
+    <!--inertia ixx="0.0006583333333333334" ixy="0.0" ixz="0.0" iyy="0.0006583333333333334" iyz="0.0" izz="0.0012500000000000002"/-->
+  </link>
+  <joint name="front_steer_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_steer_link"/>
+    <origin rpy="0.0 0.0 0.0" xyz="${wheelbase_w} 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" lower="${-pi}" upper="${pi}" velocity="5.0"/>
+    <dynamics damping="0.7" friction="0.1" />
+  </joint>
+  <transmission name="front_steer_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="front_steer_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="front_steer_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <gazebo reference="front_steer_link">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+
+
+  <link name="rear_wheel_link">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.08" radius="0.005"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+    <xacro:null_inertial />
+    <!--inertial>
+      <mass value="0.03125"/>
+    </inertial-->
+  </link>
+  <joint name="rear_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_wheel_link"/>
+    <origin rpy="${-pi/2} 0.0 0.0" xyz="0.0 0.0 0.0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <transmission name="rear_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="rear_wheel_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="rear_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <gazebo reference="rear_wheel_link">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+
+
   <!-- Start Front -->
-    <!-- Start Front right -->
-      <!-- Start Join -->
-      <joint name="front_right_wheel_steering_joint" type="revolute">
-        <parent link="body"/>
-        <child link="front_right_wheel_steering"/>
-        <origin rpy="0 0 ${pi}" xyz="${wheelbase} 0.048 0"/>
-        <limit effort="5000" lower="-0.8" upper="0.8" velocity="1"/>
-        <axis xyz="0 0 1"/>
-        <dynamics damping="0.7" friction="0.1"/>
-      </joint>
-      <link name="front_right_wheel_steering">
-        <inertial>
-          <mass value="0.1"/>
-          <inertia ixx="5.6112500000000015e-05" ixy="0" ixz="0" iyy="5.6112500000000015e-05" iyz="0" izz="5.6112500000000015e-05"/>
-        </inertial>
-      </link>
-      <joint name="front_right_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 ${-wheel_front_width/2} 0"/>
-        <parent link="front_right_wheel_steering"/>
-        <child link="front_right_wheel_spinning"/>
-        <axis xyz="0 0 -1"/>
-      </joint>
-      <!-- End Join -->
+  <!-- Start Front right -->
+  <link name="front_right_steer_link">
+    <xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="${steer_front_mass}"
+      radius="0.01"
+      length="0.01"/>
+    <!--inertial>
+      <inertia ixx="0.0006583333333333334" ixy="0.0" ixz="0.0" iyy="0.0006583333333333334" iyz="0.0" izz="0.0012500000000000002"/>
+    </inertial-->
+  </link>
+  <joint name="front_right_steer_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_right_steer_link"/>
+    <origin rpy="0.0 0.0 0.0" xyz="${wheelbase_w} ${steer_front_axe} 0.0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="5.0"/>
+  </joint>
+  <link name="front_right_wheel_link">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelFrontRight.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelFrontRight.dae" />
+      </geometry>
+    </collision>
+    <xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="${wheel_front_mass}"
+      radius="${wheel_front_radius}"
+      length="${wheel_front_width}"/>
+  </link>
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="front_right_steer_link"/>
+    <child link="front_right_wheel_link"/>
+    <origin rpy="${-pi/2} 0.0 0.0" xyz="0.0 ${-wheel_front_width/2+wheel_front_width} 0.0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <transmission name="front_right_steer_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="front_right_steer_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="front_right_steer_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <transmission name="front_right_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="front_right_wheel_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="front_right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <gazebo reference="front_right_steer_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="front_right_wheel_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <!-- End Front right -->
 
-      <!-- Start Visual -->
-      <link name="front_right_wheel_spinning">
-        <visual>
-          <geometry>
-            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelFrontRight.dae"/>
-          </geometry>
-          <material name="rubber"/>
-        </visual>
-        <collision>
-          <geometry>
-            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelFrontRight.dae"/>
-          </geometry>
-        </collision>
-        <inertial>
-          <mass value="${wheel_front_mass}"/>
-          <inertia ixx="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" iyz="0"
-                   izz="${wheel_front_mass*wheel_front_radius*wheel_front_radius/2.0}"/>
-        </inertial>
-      </link>
-      <!-- End Visual -->
 
-      <!-- Start Transmission -->
-      <transmission name="front_right_wheel_steering_joint">
-        <type>transmission_interface/SimpleTransmission</type>
-        <joint name="front_right_wheel_steering_joint">
-          <hardwareInterface>PositionJointInterface</hardwareInterface>
-        </joint>
-        <actuator name="front_right_wheel_steering_motor">
-          <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-      </transmission>
-      <!-- End Transmission -->
-    <!-- End Front right -->
-
-    <!-- Start Front left -->
-      <!-- Start Join -->
-      <joint name="front_left_wheel_steering_joint" type="revolute">
-        <parent link="body"/>
-        <child link="front_left_wheel_steering"/>
-        <origin rpy="0 0 ${pi}" xyz="${wheelbase} -0.048 0"/>
-        <limit effort="5000" lower="-0.8" upper="0.8" velocity="1"/>
-        <axis xyz="0 0 1"/>
-        <dynamics damping="0.7" friction="0.1"/>
-      </joint>
-      <link name="front_left_wheel_steering">
-        <inertial>
-          <mass value="0.1"/>
-          <inertia ixx="5.6112500000000015e-05" ixy="0" ixz="0" iyy="5.6112500000000015e-05" iyz="0" izz="5.6112500000000015e-05"/>
-        </inertial>
-      </link>
-      <joint name="front_left_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 ${wheel_front_width/2} 0"/>
-        <parent link="front_left_wheel_steering"/>
-        <child link="front_left_wheel_spinning"/>
-        <axis xyz="0 0 -1"/>
-      </joint>
-      <!-- End Join -->
-
-      <!-- Start Visual -->
-      <link name="front_left_wheel_spinning">
-        <visual>
-          <geometry>
-            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelFrontLeft.dae"/>
-          </geometry>
-          <material name="rubber"/>
-        </visual>
-        <collision>
-          <geometry>
-            <!-- <cylinder length="${wheel_front_width}" radius="${wheel_front_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelFrontLeft.dae"/>
-          </geometry>
-        </collision>
-        <inertial>
-          <mass value="${wheel_front_mass}"/>
-          <inertia ixx="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_front_mass*(3.0*wheel_front_radius*wheel_front_radius + wheel_front_width*wheel_front_width)/12.0}" iyz="0"
-                   izz="${wheel_front_mass*wheel_front_radius*wheel_front_radius/2.0}"/>
-        </inertial>
-      </link>
-      <!-- End Visual -->
-
-      <!-- Start Transmission -->
-      <transmission name="front_left_wheel_steering_joint">
-        <type>transmission_interface/SimpleTransmission</type>
-        <joint name="front_left_wheel_steering_joint">
-          <hardwareInterface>PositionJointInterface</hardwareInterface>
-        </joint>
-        <actuator name="front_left_wheel_steering_motor">
-          <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-      </transmission>
-      <!-- End Transmission -->
-    <!-- End Front left -->
+  <!-- Start Front left -->
+  <link name="front_left_steer_link">
+    <xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="${steer_front_mass}"
+      radius="0.01"
+      length="0.01"/>
+    <!--inertial>
+      <inertia ixx="0.0006583333333333334" ixy="0.0" ixz="0.0" iyy="0.0006583333333333334" iyz="0.0" izz="0.0012500000000000002"/>
+    </inertial-->
+  </link>
+  <joint name="front_left_steer_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_left_steer_link"/>
+    <origin rpy="0.0 0.0 ${pi}" xyz="${wheelbase_w} ${-steer_front_axe} 0.0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" lower="-0.7853981633974483" upper="0.7853981633974483" velocity="5.0"/>
+  </joint>
+  <link name="front_left_wheel_link">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelFrontRight.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelFrontRight.dae" />
+      </geometry>
+    </collision>
+    <xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="${wheel_front_mass}"
+      radius="${wheel_front_radius}"
+      length="${wheel_front_width}"/>
+  </link>
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="front_left_steer_link"/>
+    <child link="front_left_wheel_link"/>
+    <origin rpy="${-pi/2} 0.0 0.0" xyz="0.0 ${wheel_front_width/2} 0.0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+  <transmission name="front_left_steer_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="front_left_steer_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="front_left_steer_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <transmission name="front_left_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="front_left_wheel_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="front_left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <gazebo reference="front_left_steer_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="front_left_wheel_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <!-- End Front left -->
   <!-- End Front -->
 
 
   <!-- Start Rear -->
-    <!-- Start Rear right -->
-      <!-- Start Join -->
-      <joint name="rear_right_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 0.055 0"/>
-        <parent link="body"/>
-        <child link="rear_right_wheel_spinning"/>
-        <axis xyz="0 0 1"/>
-      </joint>
-      <!-- End Join -->
+  <!-- Start Rear right -->
+  <link name="rear_right_wheel_link">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelRearRight.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelRearRight.dae" />
+      </geometry>
+    </collision>
+    <xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="${wheel_rear_mass}"
+      radius="${wheel_rear_radius}"
+      length="${wheel_rear_width}"/>
+  </link>
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_right_wheel_link"/>
+    <origin rpy="${-pi/2} 0.0 0.0" xyz="0.0 ${steer_rear_axe} 0.0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <transmission name="rear_right_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="rear_right_wheel_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="rear_right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <gazebo reference="rear_right_wheel_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <!-- End Rear right -->
 
-      <!-- Start Visual -->
-      <link name="rear_right_wheel_spinning">
-        <visual>
-          <geometry>
-            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelRearRight.dae"/>
-          </geometry>
-          <material name="rubber"/>
-        </visual>
-        <collision>
-          <geometry>
-            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelRearRight.dae"/>
-          </geometry>
-        </collision>
-        <inertial>
-          <mass value="${wheel_rear_mass}"/>
-          <inertia ixx="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" iyz="0"
-                   izz="${wheel_rear_mass*wheel_rear_radius*wheel_rear_radius/2.0}"/>
-        </inertial>
-      </link>
-      <!-- End Visual -->
 
-      <!-- Start Transmission -->
-      <transmission name="rear_right_wheel_spinning_joint">
-        <type>transmission_interface/SimpleTransmission</type>
-        <joint name="rear_right_wheel_spinning_joint">
-          <hardwareInterface>VelocityJointInterface</hardwareInterface>
-        </joint>
-        <actuator name="rear_right_wheel_spinning_motor">
-          <hardwareInterface>VelocityJointInterface</hardwareInterface>
-          <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-      </transmission>
-      <!-- End Transmission -->
-    <!-- End Rear right -->
-
-    <!-- Start Rear left -->
-      <!-- Start Join -->
-      <joint name="rear_left_wheel_spinning_joint" type="continuous">
-        <origin rpy="${-pi/2} 0 0" xyz="0 -0.055 0"/>
-        <parent link="body"/>
-        <child link="rear_left_wheel_spinning"/>
-        <axis xyz="0 0 1"/>
-      </joint>
-      <!-- End Join -->
-
-      <!-- Start Visual -->
-      <link name="rear_left_wheel_spinning">
-        <visual>
-          <geometry>
-            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelRearLeft.dae"/>
-          </geometry>
-          <material name="rubber"/>
-        </visual>
-        <collision>
-          <geometry>
-            <!-- <cylinder length="${wheel_rear_width}" radius="${wheel_rear_radius}"/> -->
-            <mesh filename="package://picar_description/meshes/WheelRearLeft.dae"/>
-          </geometry>
-        </collision>
-        <inertial>
-          <mass value="${wheel_rear_mass}"/>
-          <inertia ixx="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" ixy="0" ixz="0"
-                   iyy="${wheel_rear_mass*(3.0*wheel_rear_radius*wheel_rear_radius + wheel_rear_width*wheel_rear_width)/12.0}" iyz="0"
-                   izz="${wheel_rear_mass*wheel_rear_radius*wheel_rear_radius/2.0}"/>
-        </inertial>
-      </link>
-      <!-- End Visual -->
-
-      <!-- Start Transmission -->
-      <transmission name="rear_left_wheel_spinning_joint">
-        <type>transmission_interface/SimpleTransmission</type>
-        <joint name="rear_left_wheel_spinning_joint">
-          <hardwareInterface>VelocityJointInterface</hardwareInterface>
-        </joint>
-        <actuator name="rear_left_wheel_spinning_motor">
-          <hardwareInterface>VelocityJointInterface</hardwareInterface>
-          <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-      </transmission>
-      <!-- End Transmission -->
-    <!-- End Rear left -->
+  <!-- Start Rear left -->
+  <link name="rear_left_wheel_link">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelRearLeft.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://picar_description/meshes/WheelRearLeft.dae" />
+      </geometry>
+    </collision>
+    <xacro:solid_cylinder_inertial
+      xyz="0.0 0.0 0.0"
+      rpy="0.0 0.0 0.0"
+      mass="${wheel_rear_mass}"
+      radius="${wheel_rear_radius}"
+      length="${wheel_rear_width}"/>
+  </link>
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_left_wheel_link"/>
+    <origin rpy="${-pi/2} 0.0 0.0" xyz="0.0 ${-steer_rear_axe} 0.0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <transmission name="rear_left_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="rear_left_wheel_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="rear_left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <gazebo reference="rear_left_wheel_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <!-- End Rear left -->
   <!-- End Rear -->
 
 </robot>

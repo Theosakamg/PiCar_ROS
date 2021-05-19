@@ -16,6 +16,6 @@
 
   <depend>joy</depend>
   <depend>ps3joy</depend>
-  <depend>teleop-twist-joy</depend>
+  <depend>joy_teleop</depend>
 
 </package>

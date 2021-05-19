@@ -1,0 +1,24 @@
+<launch>
+
+  <arg name="frame_base"      default="base_footprint"/>
+  <arg name="frame_odom"      default="odom"/>
+  <arg name="frame_map"       default="map" />
+  <arg name="scan_topic"      default="laser/scan"/>
+
+  <node pkg="gmapping" type="slam_gmapping" name="slam_mapping" output="screen">
+    <remap from="scan" to="$(arg scan_topic)"/>
+    <remap from="map" to="/map" />
+    <remap from="map_metadata" to="/map_metadata" />
+
+    <param name="odom_frame" value="$(arg frame_odom)"/>
+
+    <param name="map_update_interval" value="5.0"/>
+    <param name="particles" value="30"/>
+    <param name="xmin" value="−8"/>
+    <param name="ymin" value="−8"/>
+    <param name="xmax" value="8"/>
+    <param name="ymax" value="8"/>
+    <param name="delta" value="0.05"/>
+  </node>
+
+</launch>

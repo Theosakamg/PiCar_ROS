@@ -1,0 +1,39 @@
+joy_node:
+  dev: /dev/input/js0
+  deadzone: 0.01
+  autorepeat_rate: 20
+  coalesce_interval: 0.01
+
+teleop:
+  run_std:
+    type: topic
+    message_type: geometry_msgs/Twist
+    topic_name: cmd_vel
+    deadman_buttons: [1]
+    axis_mappings:
+      -
+        axis: 1
+        target: linear.x
+        scale: -0.31       # Maximum speed in m/s
+        offset: 0.00
+      -
+        axis: 3
+        target: angular.z
+        scale: 0.61       # Maximum angle steering 0.58 rad
+        offset: 0.00
+
+  cam_motor:
+    type: topic
+    message_type: geometry_msgs/Twist
+    topic_name: cam_vel
+    axis_mappings:
+      -
+        axis: 0
+        target: angular.y
+        scale: 5
+        offset: 0.00
+      -
+        axis: 2
+        target: angular.z
+        scale: 5
+        offset: 0.00

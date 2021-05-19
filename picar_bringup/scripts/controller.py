@@ -6,9 +6,8 @@ import time
 import math
 import atexit
 
-from drivers import PCA9685
-from drivers import TB6612
-from components import Servo, Throttle
+from drivers import PCA9685, TB6612
+from components import Servo, Throttle, Sensor
 
 from ackermann_msgs.msg import AckermannDriveStamped
 from ackermann_msgs.msg import AckermannDrive
@@ -16,6 +15,7 @@ from ackermann_msgs.msg import AckermannDrive
 from dynamic_reconfigure.server import Server as DynamicReconfigureServer
 from picar_bringup.cfg import PicarConfig
 
+import odom
 
 NODE_NAME = 'picar_controller'
 TYPE_ACKERMANN = 'ackermann_drive'
@@ -33,7 +33,6 @@ DIR_MAX = 150
 class PicarNode(object):
 
     msg = AckermannDriveStamped()
-    freq = 50
     is_running = True
 
     def __init__(self):
@@ -55,6 +54,10 @@ class PicarNode(object):
         self.motorA = TB6612.Motor(GPIO_MOTOR_ROT_A, pwm=self.throttle_a.write, offset=False)
         self.motorB = TB6612.Motor(GPIO_MOTOR_ROT_B, pwm=self.throttle_b.write, offset=False)
 
+        # Encoder sensor
+        self.encoderA = Sensor.SensorDigitalCount(20)
+        self.encoderB = Sensor.SensorDigitalCount(16)
+
         # Set origin
         self.servo.default()
         self.motorA.speed = 0
@@ -64,19 +67,21 @@ class PicarNode(object):
         rospy.init_node(NODE_NAME)
 
         # Load Parameters.
+        self.rate = float(rospy.get_param('~rate', 50.0))
+        self.arg_encoder_pulse = float(rospy.get_param('~encoder_pulse', 19))
         self.arg_wheel_diameter = float(rospy.get_param('~wheel_diameter', 0.067))
-        self.arg_motor_speed_max = int(rospy.get_param('~motor_speed_max', 195))
+        self.arg_motor_speed_max = int(rospy.get_param('~motor_speed_max', 162)) # empty : 195 (mesured)
 
         if self.arg_wheel_diameter <= 0:
             rospy.logwarn("Weel diameter can be < 0 meter !")
             self.arg_wheel_diameter = 0.067
-        
+
         if self.arg_motor_speed_max <= 0:
             rospy.logwarn("Motor max speed can be < 0 meter !")
             self.arg_motor_speed_max = 200
 
         # convert max RPM to RPS (x/60), apply RPS to perimeter, to ratio for per cent.
-        self.motor_ratio = ((float(self.arg_motor_speed_max)/60)*self.arg_wheel_diameter)/100
+        self.motor_ratio = ((float(self.arg_motor_speed_max)/60)*(self.arg_wheel_diameter*math.pi))/100
         rospy.loginfo("Motor ratio : %f (wheel %f, motor speed %d)", self.motor_ratio, self.arg_wheel_diameter, self.arg_motor_speed_max)
 
         self.ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/ackermann_cmd')
@@ -87,30 +92,28 @@ class PicarNode(object):
         # Create topics (publisher & subscriber).
         rospy.Subscriber(self.ackermann_cmd_topic, AckermannDriveStamped, self.cmd_callback, queue_size=1)
 
-        # Start main loop
-        self.thread = threading.Thread(target=self.__loop, args=())
-        self.thread.start()
+        distance_pulse = (self.arg_wheel_diameter*math.pi)/self.arg_encoder_pulse
+        self.odomNode = odom.PicarToOdom(self.encoderA, self.encoderB, distance_pulse)
 
-        # loop for process.
         rospy.loginfo("Node '%s' started.\nListening to %s", NODE_NAME, self.ackermann_cmd_topic)
-        try:
-            rospy.spin()
-        except KeyboardInterrupt:
-            self.emergency()
 
     def __del__(self):
         self.emergency()
 
-    def __loop(self):
-        while(self.is_running):
+    def spin(self):
+        r = rospy.Rate(self.rate)
+        while not rospy.is_shutdown():
+            #while(self.is_running):
+            self.msg.header.stamp = rospy.Time.now()
+
             # Manage Direction
             steering_angle = self.msg.drive.steering_angle
-            if(steering_angle > 0.1 or steering_angle < -0.1):
-                servo_angle = int(90 - 20 * steering_angle)
+            if (steering_angle == 0.0):
+                self.servo.default()
+            else:
+                servo_angle = int(90 - math.degrees(steering_angle))
                 rospy.loginfo("steering : %f \servo : %f", steering_angle, servo_angle)
                 self.servo.write(servo_angle)
-            else:
-                self.servo.default()
 
             ## Manage Speed
             # Direction of operation 
@@ -132,8 +135,10 @@ class PicarNode(object):
             self.motorA.speed = motor_speed
             self.motorB.speed = motor_speed
 
+            self.odomNode.state_callback(self.msg)
+
             ## Sleep
-            time.sleep(1/self.freq)
+            r.sleep()
 
     def cmd_callback(self, msg):
         self.msg = msg
@@ -144,14 +149,15 @@ class PicarNode(object):
         return config
 
     def emergency(self):
-        self.vel = Twist()
+        self.vel = AckermannDriveStamped()
         self.motorA.speed = 0
         self.motorB.speed = 0
         self.is_running = False
 
 # Main function.
 if __name__ == '__main__':
-    # Go to class functions that do all the heavy lifting. Do error checking.
     try:
         ne = PicarNode()
-    except rospy.ROSInterruptException: pass
+        ne.spin()
+    except rospy.ROSInterruptException:
+        ne.emergency()
