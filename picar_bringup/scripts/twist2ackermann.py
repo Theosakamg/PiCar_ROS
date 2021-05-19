@@ -63,6 +63,7 @@ class Twist2Ackermann(object):
             msg.drive.acceleration = data.linear.x                      # in m/s^2
 
         rospy.logdebug("convert: \tv:%f  \ta:%f  \t:vel:%f", msg.drive.speed, msg.drive.steering_angle, msg.drive.steering_angle_velocity)
+
         self.pub.publish(msg)
 
 

@@ -44,6 +44,7 @@ class Servo(object):
 
     self._channel = channel
     self._lock = lock
+    self.__current_angle = 0
     self._min_degree_hw = self._MIN_DEGREE_VALUE
     self._max_degree_hw = self._MAX_DEGREE_VALUE
     self._min_degree_value = self._MIN_DEGREE_VALUE
@@ -171,9 +172,13 @@ class Servo(object):
             self._channel, angle))
 
     # self._debug_('Turn angle = %f°' % angle)
-    val = self._angle_to_analog(angle)
-    val += self.offset
+    self.__current_angle = angle
+    val = self._angle_to_analog(angle) + self.offset
     self.__pwm.write(self._channel, 0, val)
+
+  @property
+  def value(self):
+    return self.__current_angle
 
   @property
   def debug(self):
